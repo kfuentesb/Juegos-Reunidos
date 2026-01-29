@@ -1,0 +1,58 @@
+$primary: #9d3648;
+$bg-black: #2b3e40;
+
+// Then import Bootstrap
+@import "../node_modules/bootstrap/scss/bootstrap";
+
+// Estilo para el trigger del dropdown de usuario
+#user-dropdown-trigger {
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 50px;
+    transition: background 0.3s;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+}
+
+// Estilo especial para el Panel Admin
+#nav-admin {
+    border: 1px dashed #ffc107;
+    border-radius: 5px;
+    margin-left: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    
+    &:hover {
+        background: rgba(255, 193, 7, 0.1);
+    }
+}
+
+#user-avatar {
+    border: 2px solid $info; // Usando tu variable de Bootstrap
+}
+
+#logout-action {
+    transition: background-color 0.2s ease-in-out;
+    font-weight: 500;
+    
+    &:hover {
+        background-color: rgba(var(--bs-danger-rgb), 0.1); // Efecto sutil rojo de Bootstrap
+        text-decoration: underline;
+    }
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; // Esto fuerza a que el body ocupe toda la pantalla
+}
+
+main {
+  flex: 1; // Esto empuja al footer hacia abajo
+}
+
+footer {
+  border-top: 3px solid #0dcaf0; // Una línea de color 'info' para que combine
+}

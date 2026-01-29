@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Juegos | Juegos Reunidos</title>
+  <link rel="stylesheet" href="../scss/input.css" />
+  <style>
+    main { flex: 1 0 auto; }
+    footer { flex-shrink: 0; }
+    .game-thumb {
+      height: 160px;
+      object-fit: cover;
+      width: 100%;
+      background: linear-gradient(135deg, #0dcaf0 0%, #0d6efd 100%);
+    }
+  </style>
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="../index.html" id="brand-home">
+        JUEGOS <span class="text-info">REUNIDOS</span>
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" href="tienda.html" id="link-tienda">Tienda</a>
+          </li>
+          <li class="nav-item">
+            <!-- En esta página "Juegos" está activo -->
+            <a class="nav-link active" id="nav-juegos" aria-current="page" href="juegos.html">Juegos</a>
+          </li>
+        </ul>
+
+        <div class="d-flex align-items-center" id="auth-section">
+          <!-- Botón login (se ocultará si hay sesión iniciada desde login.js) -->
+          <button type="button" class="btn btn-info text-white fw-bold" data-bs-toggle="modal" data-bs-target="#loginModal" id="btn-login-main">
+            Iniciar Sesión
+          </button>
+
+          <!-- Menú de perfil (se muestra si hay sesión iniciada desde login.js) -->
+          <div class="dropdown d-none" id="user-profile-menu">
+            <div class="d-flex align-items-center dropdown-toggle" role="button" data-bs-toggle="dropdown" id="user-dropdown-trigger">
+              <img src="" id="user-avatar" class="rounded-circle me-2" width="35" height="35" alt="Avatar">
+              <span class="text-white" id="user-name-label"></span>
+            </div>
+            <ul class="dropdown-menu dropdown-menu-end shadow">
+              <li>
+                <div class="dropdown-item-text text-muted small">Mi Saldo</div>
+                <div class="dropdown-item-text fw-bold text-dark" id="user-coins-label"></div>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#">Ver Perfil</a></li>
+              <li><a class="dropdown-item text-danger" href="#" id="btn-logout">Cerrar Sesión</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container my-5">
+    <header class="mb-4">
+      <h1 class="h3 fw-bold">Juegos disponibles</h1>
+      <p class="text-secondary mb-0">Elige un juego para comenzar. Pronto añadiremos más.</p>
+    </header>
+
+    <!-- Grid de juegos -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+
+      <!-- Juego 1: Cuadrados -->
+      <div class="col">
+        <div class="card shadow-sm h-100">
+          <div class="game-thumb d-flex align-items-center justify-content-center text-white">
+            <span class="fw-bold">Cuadrados</span>
+          </div>
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">Cuadrados</h5>
+            <p class="card-text text-secondary">
+              Un juego simple de agilidad: haz clic en los cuadrados que aparecen antes de que desaparezcan. Ideal para entrenar tu rapidez.
+            </p>
+            <div class="mt-auto d-flex gap-2">
+              <a class="btn btn-info text-white fw-bold" href="games/cuadrados.html">Jugar</a>
+              <span class="badge text-bg-light border">Acción</span>
+              <span class="badge text-bg-light border">Reflejos</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Juego 2: Memoria -->
+      <div class="col">
+        <div class="card shadow-sm h-100">
+          <div class="game-thumb d-flex align-items-center justify-content-center text-white" style="background: linear-gradient(135deg, #6610f2 0%, #6f42c1 100%);">
+            <span class="fw-bold">Memoria</span>
+          </div>
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">Memoria</h5>
+            <p class="card-text text-secondary">
+              Voltea cartas y encuentra las parejas en el menor número de intentos. Perfecto para mejorar la concentración.
+            </p>
+            <div class="mt-auto d-flex gap-2">
+              <a class="btn btn-info text-white fw-bold" href="juegos/memoria.html">Jugar</a>
+              <span class="badge text-bg-light border">Puzzle</span>
+              <span class="badge text-bg-light border">Lógico</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Espacio futuro para más juegos
+      <div class="col">
+        <div class="card h-100">...</div>
+      </div>
+      -->
+
+    </div>
+  </main>
+
+  <!-- Modal de Login (igual que en index para mantener la UX) -->
+  <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg">
+        <div class="modal-header bg-dark text-white text-center">
+          <h5 class="modal-title w-100">Acceso de Usuario</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <form id="form-login">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Usuario</label>
+              <input type="text" id="input-user" class="form-control" placeholder="admin" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Contraseña</label>
+              <input type="password" id="input-pass" class="form-control" placeholder="admin" required>
+            </div>
+            <div class="mb-3 small text-center">
+              <span>¿No tienes cuenta?
+                <a href="registro.html" class="text-info fw-bold text-decoration-none">Pulse aquí</a>
+              </span>
+            </div>
+            <button type="button" id="btn-do-login" class="btn btn-info w-100 text-white fw-bold py-2">
+              Entrar
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-dark text-white pt-4 pb-2">
+    <div class="container text-center">
+      <div class="row">
+        <div class="col-12">
+          <p class="mb-1 fw-bold">JUEGOS <span class="text-info">REUNIDOS</span></p>
+          <p class="small text-secondary">© <span id="footer-year">2026</span> - Tu plataforma de entretenimiento favorita.</p>
+        </div>
+      </div>
+      <hr class="border-secondary opacity-25">
+      <div class="pb-2">
+        <a href="#" class="text-secondary text-decoration-none small mx-2">Términos</a>
+        <a href="#" class="text-secondary text-decoration-none small mx-2">Privacidad</a>
+        <a href="contacto.html" class="text-secondary text-decoration-none small mx-2">Contacto</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/login.js"></script>
+</body>
+</html>
