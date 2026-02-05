@@ -45,10 +45,11 @@
             <div class="card-body p-4 p-md-5">
               <h2 class="text-center mb-4 fw-bold">Crear Cuenta</h2>
 
-              <form id="registroForm" novalidate>
+              <form id="registroForm" method="GET" action="../../procesar.php" novalidate>
                 <div class="mb-3">
                   <label class="form-label fw-bold" for="usuario">Nombre de Usuario</label>
                   <input
+                    name = "usuario"
                     type="text"
                     id="usuario"
                     class="form-control"
@@ -60,6 +61,7 @@
                 <div class="mb-3">
                   <label class="form-label fw-bold" for="email">Correo Electrónico</label>
                   <input
+                    name = "email"
                     type="email"
                     id="email"
                     class="form-control"
@@ -72,6 +74,7 @@
                 <div class="mb-3">
                   <label class="form-label fw-bold" for="telefono">Teléfono</label>
                   <input
+                    name = "telefono"
                     type="tel"
                     id="telefono"
                     class="form-control"
@@ -84,7 +87,7 @@
 
                 <div class="mb-3">
                   <label class="form-label fw-bold" for="fecha">Fecha de Nacimiento</label>
-                  <input type="date" id="fecha" class="form-control" required />
+                  <input name = "fecha" type="date" id="fecha" class="form-control" required />
                 </div>
 
                 <div class="mb-3">
@@ -126,7 +129,7 @@
 
                 <div class="mb-3">
                   <label class="form-label fw-bold" for="rol">¿Con qué frecuencia juegas?</label>
-                  <select id="rol" class="form-select" required>
+                  <select name="rol" id="rol" class="form-select" required>
                     <option value="">Selecciona una opción</option>
                     <option value="diario">A diario</option>
                     <option value="semanal">Semanalmente</option>
@@ -138,6 +141,7 @@
                   <label class="form-label fw-bold d-block">Intereses</label>
                   <div class="form-check form-check-inline">
                     <input
+                      name = "juego_estrategia"
                       class="form-check-input"
                       type="checkbox"
                       id="juego1"
@@ -147,6 +151,7 @@
                   </div>
                   <div class="form-check form-check-inline">
                     <input
+                      name = "juego_accion"
                       class="form-check-input"
                       type="checkbox"
                       id="juego2"
@@ -156,6 +161,7 @@
                   </div>
                   <div class="form-check form-check-inline">
                     <input
+                      name = "juego_rpg"
                       class="form-check-input"
                       type="checkbox"
                       id="juego3"
@@ -165,6 +171,7 @@
                   </div>
                   <div class="form-check form-check-inline">
                     <input
+                      name = "juego_puzzle"
                       class="form-check-input"
                       type="checkbox"
                       id="juego4"
@@ -174,6 +181,7 @@
                   </div>
                   <div class="form-check form-check-inline">
                     <input
+                      name = "juego_carreras"   
                       class="form-check-input"
                       type="checkbox"
                       id="juego5"
@@ -189,6 +197,7 @@
                   <div class="col-md-6 mb-3">
                     <label class="form-label fw-bold" for="password">Contraseña</label>
                     <input
+                      name = "password"
                       type="password"
                       id="password"
                       class="form-control"
@@ -198,6 +207,7 @@
                   <div class="col-md-6 mb-3">
                     <label class="form-label fw-bold" for="password2">Repetir Contraseña</label>
                     <input
+                      name = "password2"
                       type="password"
                       id="password2"
                       class="form-control"

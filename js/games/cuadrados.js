@@ -4,7 +4,7 @@ window.addEventListener("DOMContentLoaded", () => {
   // =========================
   const canvas = document.getElementById("game-canvas");
   if (!canvas) return;
-
+  // Donde vamos a draw()
   const ctx = canvas.getContext("2d");
   const scoreLabel = document.getElementById("score-label");
   const timeLabel = document.getElementById("time-label");
@@ -43,14 +43,14 @@ window.addEventListener("DOMContentLoaded", () => {
   // =========================
   // 3. FUNCIONES AUXILIARES
   // =========================
-  const isLoggedIn = () => !!window.__auth?.loggedIn;
+  const isLoggedIn = () => !! window.__auth?.loggedIn;
 
   function pushLog(text) {
     const timestamp = new Date().toLocaleTimeString("es-ES", {
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit"
-    });
+    }); 
     logs.push(`[${timestamp}] ${text}`);
     if (logs.length > LOG_LIMIT) logs.shift();
     if (eventLog) eventLog.innerHTML = logs.join("<br>");
@@ -71,7 +71,7 @@ window.addEventListener("DOMContentLoaded", () => {
   // =========================
   // 4. EVENTOS
   // =========================
-  window.addEventListener("resize", resizeCanvas);
+  window.addEventListener("resive", resizeCanvas);
   resizeCanvas();
 
   // Bloquear click derecho
@@ -80,9 +80,12 @@ window.addEventListener("DOMContentLoaded", () => {
   // Movimiento del ratón (posición en tiempo real)
   canvas.addEventListener("mousemove", (e) => {
     if (!mousePositionLabel) return;
+    // Posición real del canvas
     const rect = canvas.getBoundingClientRect();
+    // Calculamos la posición del ratón
     const mouseX = Math.floor(e.clientX - rect.left);
     const mouseY = Math.floor(e.clientY - rect.top);
+    // Aqui podemos mostrar la posición de coordenada X e Y
     mousePositionLabel.textContent = `Mouse: (${mouseX}, ${mouseY})`;
   });
 

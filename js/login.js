@@ -109,12 +109,6 @@ function broadcastAuthChange(user) {
   } catch {}
 }
 
-// Ajusta la ruta de enlace
-const computeJuegosHref = () => {
-  const estamosEnComponents = location.pathname.includes("/components/");
-  return estamosEnComponents ? "juegos.html" : "components/juegos.html";
-};
-
 // Habilita el enlace "Juegos"
 const habilitarEnlaceJuegos = () => {
   if (!navJuegos) return;
@@ -122,19 +116,7 @@ const habilitarEnlaceJuegos = () => {
   // Quitar estado disabled
   navJuegos.classList.remove("disabled");
   navJuegos.removeAttribute("aria-disabled");
-  navJuegos.removeAttribute("tabindex");
-
-  // Corregir href si es necesario
-  const hrefActual = navJuegos.getAttribute("href") || "";
-  const hayQueCorregir =
-    !hrefActual ||
-    hrefActual === "#" ||
-    /tienda\.html$/i.test(hrefActual) ||
-    /index\.html$/i.test(hrefActual);
-
-  if (hayQueCorregir) {
-    navJuegos.setAttribute("href", computeJuegosHref());
-  }
+  navJuegos.removeAttribute("tabindex")
 };
 
 /* =========================
@@ -154,7 +136,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Sin sesión: mostrar botón de login y ocultar menú de usuario
     if (btnLoginMain) btnLoginMain.classList.remove("d-none");
     if (userProfileMenu) userProfileMenu.classList.add("d-none");
-    // El enlace "Juegos" puede permanecer deshabilitado según el HTML
   }
 
   // Sincroniza estado de sesión entre pestañas/ventanas
@@ -226,7 +207,7 @@ if (btnDoLogin) {
    - Cambia botón "Iniciar Sesión" por menú de usuario
    - Rellena avatar, nombre y monedas
    - Añade pestaña Admin si el rol lo requiere
-   - Conecta el botón "Cerrar Sesión"
+   - "Cerrar Sesión"
 */
 function renderUserUI(usuario) {
   if (!usuario) return;

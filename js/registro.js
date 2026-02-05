@@ -277,3 +277,38 @@ form.addEventListener('submit', (e) => {
   alert('¡Registro completado con éxito! Bienvenido a Juegos Reunidos.');
   window.location.href = '../index.html';
 });
+ 
+// ========================
+// FUNCTION ENVIAR R7
+// ========================
+function enviar() {
+    //Recoger datos del formulario:
+    //valor=document.datos.minumero.value; //número escrito por el usuario
+    var valor= document.getElementById("minumero").value;
+    //Escribir la url para enviar los datos anteriores:
+    ruta="..procesar.php" //ruta del archivo
+    envio1="numero="+valor; //datos puntuacion
+    url=ruta+"?"+envio1; //url para enviar
+    //url=ruta+"?"+envio1+"&"+envio2; 
+    //ajax1=new ObjetoAjax; //instanciar objeto ObjetoAjax;
+    //ajax1.pedirTexto(url,"comp"); //método que devuelve texto en un id.
+    
+            var xhr = new XMLHttpRequest();
+            var txt = "";
+            xhr.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var array = JSON.parse(this.responseText);
+                    alert("Longitud del array "+array.length);
+                    for (x in array) {
+                       
+                       txt += array[x].alumno + " : " + array[x].puntuacion + "<br/>";
+                    }
+                    
+                    document.getElementById("txtHint").innerHTML = txt;
+                }
+            }
+
+    xhr.open("GET",url, true);
+    xhr.send();
+
+    }
