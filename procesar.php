@@ -1,22 +1,21 @@
 <?php  
 
-$usuario = $_GET['usuario'];
-$email = $_GET['email'];
-$telefono = $_GET['telefono'];
-$fecha = $_GET['fecha'];
-$genero = $_GET['genero'];
-$rol = $_GET['rol'];
+$usuario = $_POST['usuario'];
+$email = $_POST['email'];
+$telefono = $_POST['telefono'];
+$fecha = $_POST['fecha'];
+$genero = $_POST['genero'];
+$rol = $_POST['rol'];
 
-$estrategia = isset($_GET['juego_estrategia']) ? 1 : 0;
-$accion = isset($_GET['juego_accion']) ? 1 : 0;
-$rpg = isset($_GET['juego_rpg']) ? 1 : 0;
-$puzzle = isset($_GET['juego_puzzle']) ? 1 : 0;
-$carreras = isset($_GET['juego_carreras']) ? 1 : 0;
+$estrategia = isset($_POST['juego_estrategia']) ? 1 : 0;
+$accion = isset($_POST['juego_accion']) ? 1 : 0;
+$rpg = isset($_POST['juego_rpg']) ? 1 : 0;
+$puzzle = isset($_POST['juego_puzzle']) ? 1 : 0;
+$carreras = isset($_POST['juego_carreras']) ? 1 : 0;
 
-$password = $_GET['password'];
+$password = $_POST['password'];
 
 // Conexion base de datos
-
 $servername = "localhost";
 $database = "usuarios";
 $username = "root";

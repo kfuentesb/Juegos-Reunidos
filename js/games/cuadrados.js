@@ -26,7 +26,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Registro de logs
   const logs = [];
-  const LOG_LIMIT = 8;
+  const LOG_LIMIT = 10;
 
   // Teclas disponibles
   const keys = {
@@ -71,7 +71,7 @@ window.addEventListener("DOMContentLoaded", () => {
   // =========================
   // 4. EVENTOS
   // =========================
-  window.addEventListener("resive", resizeCanvas);
+  window.addEventListener("resize", resizeCanvas);
   resizeCanvas();
 
   // Bloquear click derecho

@@ -15,7 +15,7 @@ const checkboxesIntereses = document.querySelectorAll('input[type="checkbox"]');
    2) CONFIGURACIÓN INICIAL
    ========================= */
 // Bloquear fechas futuras
-const hoyStr = new Date().toISOString().split('T')[0];
+const hoyStr = new Date().toISOString().split('T')[0]; // AAAA-MM-DD
 fecha.setAttribute('max', hoyStr);
 
 /* =========================
@@ -126,9 +126,9 @@ const validarFechaDet = () => {
     if (!(fechaSel instanceof Date) || Number.isNaN(fechaSel.getTime())) {
       mensajes.push('Fecha inválida');
     } 
-    //else if (fechaSel >= hoy) {
-    //  mensajes.push('Debe ser anterior a hoy');
-    //}
+    else if (fechaSel >= hoy) {
+      mensajes.push('Debe ser anterior a hoy');
+    }
   }
 
   const ok = mensajes.length === 0;
@@ -149,7 +149,7 @@ const validarRolDet = () => {
 const validarInteresesDet = () => {
   const seleccionados = Array.from(checkboxesIntereses).filter((c) => c.checked).length;
   const ok = seleccionados >= 2;
-  // Pintar todos los checkboxes con el estado global del grupo
+  // Pintar todos los checkboxes
   checkboxesIntereses.forEach((c) => pintarEstado(c, ok));
   const mensajes = ok ? [] : ['Selecciona al menos 2 intereses'];
   return { ok, mensajes };
