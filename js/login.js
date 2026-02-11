@@ -163,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
    5) LOGIN (evento click)
    ========================= */
 if (btnDoLogin) {
-  btnDoLogin.addEventListener("click", () => {
+  btnDoLogin.addEventListener("click", async () => {
     const userInp = (document.getElementById("input-user")?.value || "").trim();
     const passInp = (document.getElementById("input-pass")?.value || "").trim();
 
@@ -172,31 +172,29 @@ if (btnDoLogin) {
       return;
     }
 
-    // 1) Intentamos con usuarios estáticos (admin / user)
-    let usuarioEncontrado = USUARIOS_ESTATICOS[userInp];
+    try {
+      const response = await fetch("../../login.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `usuario=${encodeURIComponent(userInp)}&password=${encodeURIComponent(passInp)}`
+      });
 
-    // 2) Si no, buscamos en los registrados por formulario (user o email)
-    if (!usuarioEncontrado) {
-      const registrados = getUsuariosRegistrados();
-      usuarioEncontrado = registrados.find(
-        (u) => u.user === userInp || u.email === userInp
-      );
+      const data = await response.json();
+
+      if (!data.success) {
+        alert(data.message || "Credenciales incorrectas");
+        return;
+      }
+
+      // data.user debe traer el usuario desde PHP
+      setSession(data.user);
+      if (loginModal) loginModal.hide();
+      renderUserUI(data.user);
+      if (seccionRegistro) seccionRegistro.style.display = "none";
+    } catch (err) {
+      console.error(err);
+      alert("Error de conexión con el servidor");
     }
-
-    // 3) Validamos contraseña
-    const credencialesOK =
-      usuarioEncontrado && (usuarioEncontrado.pass || "") === passInp;
-
-    if (!credencialesOK) {
-      alert("Usuario o contraseña incorrectos. Prueba con admin/admin o user/1234");
-      return;
-    }
-
-    // 4) Guardamos sesión y actualizamos la UI
-    setSession(usuarioEncontrado); // <-- ahora también publica estado y evento
-    if (loginModal) loginModal.hide();
-    renderUserUI(usuarioEncontrado);
-    if (seccionRegistro) seccionRegistro.style.display = "none";
   });
 }
 
