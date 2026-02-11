@@ -8,11 +8,11 @@ $telefono = $_POST['telefono'] ?? '';
 $fecha = $_POST['fecha'] ?? '';
 $genero = $_POST['genero'] ?? '';
 $rol = $_POST['rol'] ?? '';
-$estrategia = $_POST['juego_estrategia'] ?? 0;
-$accion = $_POST['juego_accion'] ?? 0;
-$rpg = $_POST['juego_rpg'] ?? 0;
-$puzzle = $_POST['juego_puzzle'] ?? 0;
-$carreras = $_POST['juego_carreras'] ?? 0;
+$estrategia = isset($_POST['juego_estrategia']) ? (int)$_POST['juego_estrategia'] : 0;
+$accion = isset($_POST['juego_accion']) ? (int)$_POST['juego_accion'] : 0;
+$rpg = isset($_POST['juego_rpg']) ? (int)$_POST['juego_rpg'] : 0;
+$puzzle = isset($_POST['juego_puzzle']) ? (int)$_POST['juego_puzzle'] : 0;
+$carreras = isset($_POST['juego_carreras']) ? (int)$_POST['juego_carreras'] : 0;
 $password = $_POST['password'] ?? '';
 
 // Validación mínima
@@ -50,7 +50,7 @@ try {
 
   $stmt = $conn->prepare($sql);
   $stmt->bind_param(
-    "ssssssiiiiiss",
+    "ssssssiiiiis",
     $usuario,
     $email,
     $telefono,

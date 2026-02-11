@@ -64,7 +64,7 @@ const postAjax = (params, onOk, onErr) => {
       }
     }
   };
-  xhr.open("POST", "procesar.php", true);
+  xhr.open("POST", "/Juegos%20Reunidos/php/procesar.php", true);
   xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
   xhr.send(params);
 };

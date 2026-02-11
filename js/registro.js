@@ -223,7 +223,7 @@ form.addEventListener('submit', (e) => {
   };
 
   $.ajax({
-    url: 'registro.php',
+    url: '../php/registro.php',
     method: 'POST',
     data: datos,
     dataType: 'json',
