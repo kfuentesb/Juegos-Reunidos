@@ -13,6 +13,9 @@
   "type": "commonjs",
   "dependencies": {
     "bootstrap": "^5.3.8",
+    "datatables.net-bs5": "^2.3.7",
+    "datatables.net-responsive-bs5": "^3.0.8",
+    "jquery": "^4.0.0",
     "sass": "^1.96.0"
   }
 }

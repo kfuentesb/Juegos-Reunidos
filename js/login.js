@@ -1,7 +1,3 @@
-/* =========================================================
-   LOGIN Y SESIÓN (AJAX + PHP SESSION)
-   ========================================================= */
-
 /* =========================
    1) CAPTURA DE ELEMENTOS
    ========================= */
@@ -48,25 +44,32 @@ const mostrarUIAnonimo = () => {
   if (seccionRegistro) seccionRegistro.style.display = "";
 };
 
+/**
+ * Enviar datos a /Juegos%20Reunidos/php/procesar.php usando AJAX POST
+ * @param {string} params - Parámetros URL-encoded para enviar al servidor
+ * @param {function} onOk  - Callback para exito
+ * @param {function} onErr - Callback para error
+ * AJA POST
+ */
 const postAjax = (params, onOk, onErr) => {
-  const xhr = new XMLHttpRequest();
+  const xhr = new XMLHttpRequest(); // Crear el XMLHttpRequest para hacer una petición HTTP
   xhr.onreadystatechange = function () {
-    if (this.readyState === 4) {
-      if (this.status === 200) {
-        try {
-          const data = JSON.parse(this.responseText);
+    if (this.readyState === 4) { // Si Operación completada
+      if (this.status === 200) { // HTTP 200 OK
+        try { 
+          const data = JSON.parse(this.responseText); // Objeto JS, sino es valido se captura
           onOk && onOk(data);
         } catch (err) {
           onErr && onErr("Respuesta inválida del servidor");
         }
-      } else {
+      } else { // Si no es 200, error
         onErr && onErr("Error de conexión con el servidor");
       }
     }
   };
   xhr.open("POST", "/Juegos%20Reunidos/php/procesar.php", true);
-  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-  xhr.send(params);
+  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded"); // Configuramos cabeceras en el formato nombre=Kevin&edad=20
+  xhr.send(params); // accion=login&usuario=Kevin&clave=1234
 };
 
 /* =========================

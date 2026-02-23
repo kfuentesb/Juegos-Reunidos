@@ -222,7 +222,8 @@ form.addEventListener('submit', (e) => {
     password: pass1.value
   };
 
-  $.ajax({
+  // AJAX con jQuery para enviar datos al servidor
+  $.ajax({ // Generamos la petición asyncrona
     url: '../php/registro.php',
     method: 'POST',
     data: datos,
