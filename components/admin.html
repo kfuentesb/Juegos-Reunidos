@@ -4,13 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Panel Admin | Juegos Reunidos</title>
+  <!-- Hoja de estilos propia del proyecto -->
   <link rel="stylesheet" href="../scss/input.css" />
+  <!-- Bootstrap 5 para componentes UI (modales, botones, grid…) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <!-- DataTables con tema Bootstrap 5 y soporte responsive -->
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" />
   <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css" />
   <style>
     main { flex: 1 0 auto; }
     footer { flex-shrink: 0; }
+    /* Cabecera degradada del panel admin */
     .admin-header {
       background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
       color: white;
@@ -24,6 +28,7 @@
       color: #0d6efd;
       margin-bottom: 1rem;
     }
+    /* Limitar altura de la tabla con scroll vertical */
     .table-responsive {
       max-height: 420px;
       overflow-y: auto;
@@ -31,11 +36,16 @@
     .btn-admin {
       font-weight: bold;
     }
+    /* Badge del total de usuarios */
+    .badge-total {
+      font-size: 1rem;
+      padding: .4em .8em;
+    }
   </style>
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
 
-  <!-- Navbar -->
+  <!-- ===== NAVBAR ===== -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
     <div class="container">
       <a class="navbar-brand fw-bold" href="../index.html">
@@ -75,29 +85,62 @@
     </div>
   </nav>
 
+  <!-- ===== CONTENIDO PRINCIPAL ===== -->
   <main class="container my-5">
+
+    <!-- Cabecera del panel -->
     <div class="admin-header text-center mb-4">
       <h2 class="fw-bold mb-2">Panel de Administración</h2>
-      <p class="lead mb-0">Gestiona usuarios desde aquí.</p>
+      <p class="lead mb-0">
+        Gestiona usuarios · Total en BD:
+        <span class="badge bg-warning text-dark badge-total" id="total-usuarios-badge">–</span>
+      </p>
     </div>
 
+    <!-- ===== SECCIÓN GRÁFICAS ===== -->
+    <!--
+      Dos gráficas generadas con Chart.js usando los datos JSON de usuarios-lista.php:
+        1. Gráfica de tarta: nº de usuarios por tipo (admin / jugador)
+        2. Gráfica de barras: puntuación de cada alumno
+    -->
     <section class="mb-5">
-      <div class="admin-section-title">Gráfico de usuarios por rol</div>
-      <div class="bg-white p-3 rounded shadow-sm">
-        <canvas id="grafico-usuarios" height="120"></canvas>
+      <div class="admin-section-title">Estadísticas de usuarios (datos en tiempo real)</div>
+      <div class="row g-3">
+        <!-- Gráfica 1: usuarios por tipo -->
+        <div class="col-md-5">
+          <div class="bg-white p-3 rounded shadow-sm h-100">
+            <h6 class="text-center text-muted mb-3">Distribución de usuarios por tipo</h6>
+            <canvas id="grafico-usuarios" height="180"></canvas>
+          </div>
+        </div>
+        <!-- Gráfica 2: puntuaciones por alumno -->
+        <div class="col-md-7">
+          <div class="bg-white p-3 rounded shadow-sm h-100">
+            <h6 class="text-center text-muted mb-3">Puntuaciones por alumno</h6>
+            <canvas id="grafico-puntuaciones" height="180"></canvas>
+          </div>
+        </div>
       </div>
     </section>
 
+    <!-- ===== SECCIÓN DATATABLE ===== -->
+    <!--
+      DataTable de jQuery que muestra los datos de la tabla alumnos:
+        - ID Alumno  (idAlumno de la tabla alumnos)
+        - Nombre Alumno (campo alumno/usuario)
+        - Puntuación    (campo puntuacion de la tabla alumnos)
+        - Acciones      (botones Editar / Eliminar)
+      Los datos se obtienen mediante fetch() a usuarios-lista.php (JSON).
+    -->
     <section class="mb-5">
-      <div class="admin-section-title">Usuarios registrados</div>
+      <div class="admin-section-title">Alumnos registrados</div>
       <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle nowrap w-100" id="tabla-usuarios">
           <thead class="table-dark">
             <tr>
               <th>#</th>
-              <th>Usuario</th>
-              <th>Correo</th>
-              <th>Rol</th>
+              <th>ID Alumno</th>
+              <th>Nombre Alumno</th>
               <th>Puntuación</th>
               <th>Acciones</th>
             </tr>
@@ -105,11 +148,17 @@
           <tbody></tbody>
         </table>
       </div>
-      <button class="btn btn-success mt-3 fw-bold btn-admin" id="btn-add-user">Añadir Usuario</button>
+      <button class="btn btn-success mt-3 fw-bold btn-admin" id="btn-add-user">
+        ＋ Añadir Usuario
+      </button>
     </section>
   </main>
 
-  <!-- Modal Crear Usuario -->
+  <!-- ===== MODAL: CREAR USUARIO ===== -->
+  <!--
+    Formulario para crear un nuevo usuario.
+    El submit envía los datos mediante fetch() a usuarios-crear.php en formato JSON.
+  -->
   <div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -127,10 +176,18 @@
               <label class="form-label fw-bold">Correo</label>
               <input type="email" id="add-email" class="form-control" required />
             </div>
+            <!-- Tipo: admin o jugador (rol en la aplicación) -->
             <div class="mb-3">
-              <label class="form-label fw-bold">Rol</label>
-              <select id="add-rol" class="form-select" required>
+              <label class="form-label fw-bold">Tipo</label>
+              <select id="add-tipo" class="form-select" required>
+                <option value="jugador">jugador</option>
                 <option value="admin">admin</option>
+              </select>
+            </div>
+            <!-- Rol: frecuencia de juego -->
+            <div class="mb-3">
+              <label class="form-label fw-bold">Frecuencia</label>
+              <select id="add-rol" class="form-select" required>
                 <option value="a-diario">a-diario</option>
                 <option value="semanalmente">semanalmente</option>
                 <option value="ocasionalmente">ocasionalmente</option>
@@ -154,7 +211,12 @@
     </div>
   </div>
 
-  <!-- Modal Editar Usuario -->
+  <!-- ===== MODAL: EDITAR USUARIO ===== -->
+  <!--
+    Formulario para modificar un usuario existente.
+    El submit envía los datos mediante fetch() a usuarios-actualizar.php.
+    El campo "usuario" es de solo lectura (es la clave primaria de búsqueda).
+  -->
   <div class="modal fade" id="editUserModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -164,6 +226,7 @@
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
+            <!-- Campo oculto para identificar al usuario que se edita -->
             <input type="hidden" id="edit-usuario-hidden" />
             <div class="mb-3">
               <label class="form-label fw-bold">Usuario</label>
@@ -173,10 +236,18 @@
               <label class="form-label fw-bold">Correo</label>
               <input type="email" id="edit-email" class="form-control" required />
             </div>
+            <!-- Tipo: admin o jugador -->
             <div class="mb-3">
-              <label class="form-label fw-bold">Rol</label>
-              <select id="edit-rol" class="form-select" required>
+              <label class="form-label fw-bold">Tipo</label>
+              <select id="edit-tipo" class="form-select" required>
+                <option value="jugador">jugador</option>
                 <option value="admin">admin</option>
+              </select>
+            </div>
+            <!-- Frecuencia de juego -->
+            <div class="mb-3">
+              <label class="form-label fw-bold">Frecuencia</label>
+              <select id="edit-rol" class="form-select" required>
                 <option value="a-diario">a-diario</option>
                 <option value="semanalmente">semanalmente</option>
                 <option value="ocasionalmente">ocasionalmente</option>
@@ -189,13 +260,14 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-info text-white fw-bold">Guardar</button>
+            <button type="submit" class="btn btn-info text-white fw-bold">Guardar cambios</button>
           </div>
         </form>
       </div>
     </div>
   </div>
 
+  <!-- ===== FOOTER ===== -->
   <footer class="bg-dark text-white pt-4 pb-2 mt-auto">
     <div class="container text-center">
       <p class="mb-1 fw-bold">JUEGOS <span class="text-info">REUNIDOS</span></p>
@@ -203,14 +275,20 @@
     </div>
   </footer>
 
+  <!-- Bootstrap JS (incluye Popper para modales y dropdowns) -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- jQuery (requerido por DataTables) -->
   <script src="../js/jquery-3.5.1.min.js"></script>
+  <!-- DataTables core + tema Bootstrap 5 + responsive -->
   <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
   <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
   <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+  <!-- Chart.js para las gráficas de estadísticas -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- login.js gestiona la sesión y el modal de login global -->
   <script src="../js/login.js"></script>
+  <!-- admin.js contiene toda la lógica del panel: verificación admin, DataTable y gráficas -->
   <script src="../js/admin.js"></script>
 </body>
 </html>
