@@ -6,6 +6,8 @@
   <title>Panel Admin | Juegos Reunidos</title>
   <link rel="stylesheet" href="../scss/input.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css" />
   <style>
     main { flex: 1 0 auto; }
     footer { flex-shrink: 0; }
@@ -23,7 +25,7 @@
       margin-bottom: 1rem;
     }
     .table-responsive {
-      max-height: 320px;
+      max-height: 420px;
       overflow-y: auto;
     }
     .btn-admin {
@@ -33,7 +35,7 @@
 </head>
 <body class="bg-light d-flex flex-column min-vh-100">
 
-  <!-- Navbar (igual que en otras páginas) -->
+  <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
     <div class="container">
       <a class="navbar-brand fw-bold" href="../index.html">
@@ -45,15 +47,9 @@
 
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link" href="tienda.html">Tienda</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="juegos.html">Juegos</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="admin.html">Panel Admin</a>
-          </li>
+          <li class="nav-item"><a class="nav-link" href="tienda.html">Tienda</a></li>
+          <li class="nav-item"><a class="nav-link" href="juegos.html">Juegos</a></li>
+          <li class="nav-item"><a class="nav-link active" aria-current="page" href="admin.html">Panel Admin</a></li>
         </ul>
         <div class="d-flex align-items-center">
           <button type="button" class="btn btn-info text-white fw-bold" data-bs-toggle="modal" data-bs-target="#loginModal" id="btn-login-main">
@@ -82,142 +78,139 @@
   <main class="container my-5">
     <div class="admin-header text-center mb-4">
       <h2 class="fw-bold mb-2">Panel de Administración</h2>
-      <p class="lead mb-0">Gestiona usuarios, juegos y administradores desde aquí.</p>
+      <p class="lead mb-0">Gestiona usuarios desde aquí.</p>
     </div>
+
+    <section class="mb-5">
+      <div class="admin-section-title">Gráfico de usuarios por rol</div>
+      <div class="bg-white p-3 rounded shadow-sm">
+        <canvas id="grafico-usuarios" height="120"></canvas>
+      </div>
+    </section>
 
     <section class="mb-5">
       <div class="admin-section-title">Usuarios registrados</div>
       <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle">
+        <table class="table table-bordered table-hover align-middle nowrap w-100" id="tabla-usuarios">
           <thead class="table-dark">
             <tr>
-              <th scope="col">#</th>
-              <th scope="col">Usuario</th>
-              <th scope="col">Correo</th>
-              <th scope="col">Rol</th>
-              <th scope="col">Puntuación</th>
-              <th scope="col">Acciones</th>
+              <th>#</th>
+              <th>Usuario</th>
+              <th>Correo</th>
+              <th>Rol</th>
+              <th>Puntuación</th>
+              <th>Acciones</th>
             </tr>
           </thead>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>admin</td>
-              <td>admin@demo.com</td>
-              <td>admin</td>
-              <td>250</td>
-              <td>
-                <button class="btn btn-sm btn-warning btn-admin">Editar</button>
-                <button class="btn btn-sm btn-danger btn-admin">Eliminar</button>
-              </td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>usuario1</td>
-              <td>usu1@mail.com</td>
-              <td>a-diario</td>
-              <td>70</td>
-              <td>
-                <button class="btn btn-sm btn-warning btn-admin">Editar</button>
-                <button class="btn btn-sm btn-danger btn-admin">Eliminar</button>
-              </td>
-            </tr>
-            <!-- Más usuarios se pueden cargar dinámicamente -->
-          </tbody>
+          <tbody></tbody>
         </table>
       </div>
-      <button class="btn btn-success mt-3 fw-bold btn-admin">Añadir Usuario</button>
-    </section>
-
-    <section class="mb-5">
-      <div class="admin-section-title">Juegos disponibles</div>
-      <div class="table-responsive">
-        <table class="table table-striped table-hover align-middle">
-          <thead class="table-dark">
-            <tr>
-              <th scope="col">#</th>
-              <th scope="col">Nombre</th>
-              <th scope="col">Categoría</th>
-              <th scope="col">Precio</th>
-              <th scope="col">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>Catan</td>
-              <td>Estrategia</td>
-              <td>€36.99</td>
-              <td>
-                <button class="btn btn-sm btn-warning btn-admin">Editar</button>
-                <button class="btn btn-sm btn-danger btn-admin">Eliminar</button>
-              </td>
-            </tr>
-            <tr>
-              <td>2</td>
-              <td>Dixit</td>
-              <td>Creatividad</td>
-              <td>€27.99</td>
-              <td>
-                <button class="btn btn-sm btn-warning btn-admin">Editar</button>
-                <button class="btn btn-sm btn-danger btn-admin">Eliminar</button>
-              </td>
-            </tr>
-            <!-- Más juegos dinámicos -->
-          </tbody>
-        </table>
-      </div>
-      <button class="btn btn-success mt-3 fw-bold btn-admin">Añadir Juego</button>
-    </section>
-
-    <section>
-      <div class="admin-section-title">Administradores</div>
-      <div class="table-responsive">
-        <table class="table table-hover align-middle">
-          <thead class="table-dark">
-            <tr>
-              <th scope="col">Usuario</th>
-              <th scope="col">Correo</th>
-              <th scope="col">Permisos</th>
-              <th scope="col">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>admin</td>
-              <td>admin@demo.com</td>
-              <td>Todos</td>
-              <td>
-                <button class="btn btn-sm btn-warning btn-admin">Editar</button>
-                <button class="btn btn-sm btn-danger btn-admin">Eliminar</button>
-              </td>
-            </tr>
-            <!-- Más administradores -->
-          </tbody>
-        </table>
-      </div>
-      <button class="btn btn-success mt-3 fw-bold btn-admin">Añadir Administrador</button>
+      <button class="btn btn-success mt-3 fw-bold btn-admin" id="btn-add-user">Añadir Usuario</button>
     </section>
   </main>
 
+  <!-- Modal Crear Usuario -->
+  <div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="addUserForm">
+          <div class="modal-header bg-dark text-white">
+            <h5 class="modal-title">Crear Usuario</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Usuario</label>
+              <input type="text" id="add-usuario" class="form-control" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Correo</label>
+              <input type="email" id="add-email" class="form-control" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Rol</label>
+              <select id="add-rol" class="form-select" required>
+                <option value="admin">admin</option>
+                <option value="a-diario">a-diario</option>
+                <option value="semanalmente">semanalmente</option>
+                <option value="ocasionalmente">ocasionalmente</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Contraseña</label>
+              <input type="password" id="add-password" class="form-control" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Puntuación</label>
+              <input type="number" id="add-puntuacion" class="form-control" min="0" value="0" />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-success fw-bold">Crear</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Editar Usuario -->
+  <div class="modal fade" id="editUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="editUserForm">
+          <div class="modal-header bg-dark text-white">
+            <h5 class="modal-title">Editar Usuario</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="edit-usuario-hidden" />
+            <div class="mb-3">
+              <label class="form-label fw-bold">Usuario</label>
+              <input type="text" id="edit-usuario" class="form-control" readonly />
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Correo</label>
+              <input type="email" id="edit-email" class="form-control" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Rol</label>
+              <select id="edit-rol" class="form-select" required>
+                <option value="admin">admin</option>
+                <option value="a-diario">a-diario</option>
+                <option value="semanalmente">semanalmente</option>
+                <option value="ocasionalmente">ocasionalmente</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Puntuación</label>
+              <input type="number" id="edit-puntuacion" class="form-control" min="0" />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-info text-white fw-bold">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <footer class="bg-dark text-white pt-4 pb-2 mt-auto">
     <div class="container text-center">
-      <div class="row">
-        <div class="col-12">
-          <p class="mb-1 fw-bold">JUEGOS <span class="text-info">REUNIDOS</span></p>
-          <p class="small text-secondary">© 2026 - Tu plataforma de entretenimiento favorita.</p>
-        </div>
-      </div>
-      <hr class="border-secondary opacity-25">
-      <div class="pb-2">
-        <a href="#" class="text-secondary text-decoration-none small mx-2">Términos</a>
-        <a href="#" class="text-secondary text-decoration-none small mx-2">Privacidad</a>
-        <a href="contacto.html" class="text-secondary text-decoration-none small mx-2">Contacto</a>
-      </div>
+      <p class="mb-1 fw-bold">JUEGOS <span class="text-info">REUNIDOS</span></p>
+      <p class="small text-secondary">© 2026 - Tu plataforma de entretenimiento favorita.</p>
     </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../js/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
+  <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+  <script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="../js/login.js"></script>
+  <script src="../js/admin.js"></script>
 </body>
 </html>

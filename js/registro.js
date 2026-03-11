@@ -228,7 +228,7 @@ form.addEventListener('submit', (e) => {
     method: 'POST',
     data: datos,
     dataType: 'json',
-    success: function (respuesta) {
+    success: function (respuesta) { // Función que se ejecuta cuando el servidor responde con éxito
       if (!respuesta.success) {
         alert(respuesta.message || 'Error al registrar');
         return;

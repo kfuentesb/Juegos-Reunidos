@@ -2,7 +2,7 @@
 header('Content-Type: application/json; charset=utf-8'); // Respuesta en JSON y UTF-8. Cabecera HTTP
 
 // Recoger datos enviados por POST (si no existen, se ponen como cadena vacía)
-$usuario = $_POST['usuario'] ?? '';
+$usuario = $_POST['usuario'] ?? ''; // El operador ?? verifica si $_POST['usuario'] existe y no es null. Si no, asigna ''.
 $email = $_POST['email'] ?? '';
 $telefono = $_POST['telefono'] ?? '';
 $fecha = $_POST['fecha'] ?? '';
@@ -10,7 +10,7 @@ $genero = $_POST['genero'] ?? '';
 $rol = $_POST['rol'] ?? '';
 $estrategia = isset($_POST['juego_estrategia']) ? (int)$_POST['juego_estrategia'] : 0;
 $accion = isset($_POST['juego_accion']) ? (int)$_POST['juego_accion'] : 0;
-$rpg = isset($_POST['juego_rpg']) ? (int)$_POST['juego_rpg'] : 0;
+$rpg = isset($_POST['juego_rpg']) ? (int)$_POST['juego_rpg'] : 0; // Si el checkbox no se marca, no se envía, por eso usamos isset para asignar 0 si no existe
 $puzzle = isset($_POST['juego_puzzle']) ? (int)$_POST['juego_puzzle'] : 0;
 $carreras = isset($_POST['juego_carreras']) ? (int)$_POST['juego_carreras'] : 0;
 $password = $_POST['password'] ?? '';

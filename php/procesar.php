@@ -1,20 +1,16 @@
 <?php
-session_start(); // Inicia la sesión PHP para poder guardar el usuario
-header('Content-Type: application/json; charset=utf-8'); // Respuesta en JSON
+session_start();
+header('Content-Type: application/json; charset=utf-8');
 
-$accion = $_POST['accion'] ?? ''; // Acción recibida (login, logout, estado)
+$accion = $_POST['accion'] ?? '';
 
-/* =========================
-   1) ESTADO DE SESIÓN
-   ========================= */
 if ($accion === 'estado') {
-  // Si hay sesión, devolvemos al usuario
-  if (isset($_SESSION['user'])) { // comprobar un array con la sesion
-    echo json_encode([ // Si hay sesion devolvemos al usuario (se convierte en JSON)
+  if (isset($_SESSION['user'])) {
+    echo json_encode([
       "loggedIn" => true,
       "user" => $_SESSION['user']
     ]);
-  } else { // No existe
+  } else {
     echo json_encode([
       "loggedIn" => false
     ]);
@@ -22,22 +18,15 @@ if ($accion === 'estado') {
   exit;
 }
 
-/* =========================
-   2) LOGOUT
-   ========================= */
 if ($accion === 'logout') {
-  // Limpiamos y destruimos la sesión
-  session_unset(); // Elimina todas las variables de sesión
-  session_destroy(); // Destruye la sesión del servidor
-  echo json_encode([ // Envia el json con success
+  session_unset();
+  session_destroy();
+  echo json_encode([
     "success" => true
   ]);
   exit;
 }
 
-/* =========================
-   3) VALIDAR ACCIÓN
-   ========================= */
 if ($accion !== 'login') {
   echo json_encode([
     "success" => false,
@@ -46,73 +35,48 @@ if ($accion !== 'login') {
   exit;
 }
 
-/* =========================
-   4) RECIBIR CREDENCIALES
-   ========================= */
-    // Recibimos el usuario y el password y limpiamos espacios y con isset verificamos si existe
 $usuario = isset($_POST['usuario']) ? trim($_POST['usuario']) : '';
 $password = isset($_POST['password']) ? trim($_POST['password']) : '';
 
-// Si faltan datos, error
 if ($usuario === '' || $password === '') {
-  echo json_encode([ // JSON error si falta algo
-    "success" => false, 
+  echo json_encode([
+    "success" => false,
     "message" => "Usuario y contraseña obligatorios"
   ]);
   exit;
 }
 
-/* =========================
-   5) CONEXIÓN A BD
-   ========================= */
-$servername = "localhost";
-$database = "ada";
-$username = "root";
-$dbpassword = "";
-
-$conn = new mysqli($servername, $username, $dbpassword, $database); // Objeto de conexión
-if ($conn->connect_error) { // Si hay error de conexion
-  echo json_encode([ // JSON
+$conn = new mysqli("localhost", "root", "", "ada");
+if ($conn->connect_error) {
+  echo json_encode([
     "success" => false,
     "message" => "Error conexión DB"
   ]);
   exit;
 }
 
-/* =========================
-   6) BUSCAR USUARIO
-   ========================= */
-$sql = "SELECT usuario, rol, password 
+$sql = "SELECT usuario, rol, tipo, password 
         FROM usuarios 
         WHERE usuario = ? LIMIT 1";
 
-$stmt = $conn->prepare($sql); // Preparamos la consulta segura
-$stmt->bind_param("s", $usuario); // Pasamos un string y $usuario reemplaza ?
-$stmt->execute(); // Ejecuta
-$result = $stmt->get_result(); // Objeto resultado
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $usuario);
+$stmt->execute();
+$result = $stmt->get_result();
 
-if ($result->num_rows === 0) { // En caso de 0 filas, no encontro nada
+if ($result->num_rows === 0) {
   echo json_encode([
     "success" => false,
     "message" => "Usuario no encontrado"
   ]);
-  // Cerramos statement y conexion
   $stmt->close();
   $conn->close();
   exit;
 }
-/**$row = [
-  "usuario" => "Kevin",
-  "rol" => "admin",
-  "password" => "hash_almacenado"
-]; */
-$row = $result->fetch_assoc(); // Convertir a array asociativo
 
+$row = $result->fetch_assoc();
 
-/* =========================
-   7) COMPROBAR CONTRASEÑA
-   ========================= */
-if ($row['password'] !== $password) { // Si no coinciden, error
+if ($row['password'] !== $password) {
   echo json_encode([
     "success" => false,
     "message" => "Contraseña incorrecta"
@@ -122,38 +86,30 @@ if ($row['password'] !== $password) { // Si no coinciden, error
   exit;
 }
 
-/* =========================
-   8) OBTENER PUNTUACIÓN
-   ========================= */
 $puntuacion = 0;
-$sql2 = "SELECT puntuacion FROM alumnos WHERE alumno = ? LIMIT 1"; // Consulta para obtener la puntuación del alumno
+$sql2 = "SELECT puntuacion FROM alumnos WHERE alumno = ? LIMIT 1";
 $stmt2 = $conn->prepare($sql2);
-$stmt2->bind_param("s", $usuario); // Pasamos el nombre de usuario para buscar su puntuación
+$stmt2->bind_param("s", $usuario);
 $stmt2->execute();
-$res2 = $stmt2->get_result(); // Si hay resultado, obtenemos la puntuación (si no, queda en 0)
+$res2 = $stmt2->get_result();
 
 if ($res2->num_rows > 0) {
-  // La idea es ['usuario' => 'Kevin', 'puntuacion' => 150]
-  $puntuacion = (int)$res2->fetch_assoc()['puntuacion']; // Array asociativo con puntuación en int
+  $puntuacion = (int)$res2->fetch_assoc()['puntuacion'];
 }
 $stmt2->close();
 
-/* =========================
-   9) GUARDAR SESIÓN
-   ========================= */
-$userData = [ // Datos del usuario a guardar
+$userData = [
   'user' => $row['usuario'],
-  'rol' => $row['rol'],
+  'rol' => $row['tipo'],        // Para admin check
+  'tipo' => $row['tipo'],       // Admin/jugador real
+  'frecuencia' => $row['rol'],  // Frecuencia real
   'puntuacion' => $puntuacion,
-  'avatar' => "https://api.dicebear.com/7.x/avataaars/svg?seed=" . urlencode($row['usuario']) // Asegura el nombre usuario en la url
+  'avatar' => "https://api.dicebear.com/7.x/avataaars/svg?seed=" . urlencode($row['usuario'])
 ];
 
-$_SESSION['user'] = $userData; // guardar sesión
+$_SESSION['user'] = $userData;
 
-/* =========================
-   10) RESPUESTA FINAL
-   ========================= */
-echo json_encode([ // JSON exito, enviamos a $userData
+echo json_encode([
   "success" => true,
   "user" => $userData
 ]);
