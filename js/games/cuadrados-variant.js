@@ -314,6 +314,7 @@
     refreshButtons();
     clearInterval(timerInterval);
     logEvent(`Juego finalizado (${reason}). Puntos: ${points}`);
+    guardarPuntuacion(points); // Guardar puntuación en localStorage para el panel admin
     alert(`Juego finalizado y los puntos conseguidos: ${points}`);
   };
 
@@ -433,6 +434,41 @@
   // ============================================================
   // SECCIÓN 15: INICIALIZACIÓN
   // ============================================================
+
+  /**
+   * Guarda la puntuación del usuario actual en localStorage.
+   * Solo conserva la puntuación más alta por usuario.
+   * El panel admin lee esta clave ("jrPuntuaciones") para mostrar scores.
+   */
+  const guardarPuntuacion = (puntos) => {
+    let sesion = null;
+    try { sesion = JSON.parse(localStorage.getItem('session')); } catch {}
+    if (!sesion) return;
+
+    const KEY = 'jrPuntuaciones';
+    let lista = [];
+    try {
+      const raw = localStorage.getItem(KEY);
+      lista = JSON.parse(raw) || [];
+      if (!Array.isArray(lista)) lista = [];
+    } catch (err) {
+      console.warn('Error al leer puntuaciones:', err);
+      lista = [];
+    }
+
+    const idx = lista.findIndex(p => p.user === sesion.user);
+    if (idx >= 0) {
+      // Solo actualizamos si supera la puntuación anterior
+      if (puntos > lista[idx].puntuacion) lista[idx].puntuacion = puntos;
+    } else {
+      lista.push({ user: sesion.user, puntuacion: puntos });
+    }
+
+    localStorage.setItem(KEY, JSON.stringify(lista));
+    // Invalidar caché del panel admin para reflejar la nueva puntuación
+    localStorage.removeItem('jrAdmin_usuarios');
+  };
+
   updateScore();
   updateTime();
   setAuthUI(detectLogin());

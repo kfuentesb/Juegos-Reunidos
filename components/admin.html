@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel Admin – Juegos Reunidos</title>
+
+    <!-- Bootstrap CSS (del proyecto) -->
+    <link rel="stylesheet" href="../scss/input.css" />
+
+    <!-- DataTables Bootstrap 5 CSS (integración visual con Bootstrap) -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
+
+    <style>
+        /* Aseguramos que el main crezca y el footer quede abajo */
+        main  { flex: 1 0 auto; }
+        footer { flex-shrink: 0; }
+
+        /* Borde lateral de color en las tarjetas de estadísticas */
+        .stat-card          { border-left: 4px solid transparent; }
+        .stat-card.total    { border-color: #0d6efd; }
+        .stat-card.mejor    { border-color: #198754; }
+        .stat-card.media    { border-color: #ffc107; }
+
+        /* Altura máxima de la gráfica */
+        #grafica-usuarios   { max-height: 340px; }
+
+        /* Evitar salto de línea en los botones de acción */
+        .dt-acciones        { white-space: nowrap; }
+    </style>
+</head>
+
+<body class="bg-light d-flex flex-column min-vh-100">
+
+    <!-- ============================================================
+         NAVBAR DEL PANEL ADMIN
+         - Muestra la marca, la insignia "Panel Admin", el avatar
+           del administrador y el botón de cerrar sesión.
+         - admin.js rellena #admin-nombre y #admin-avatar con los
+           datos de la sesión guardada en localStorage.
+    ============================================================ -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="../index.html">
+                JUEGOS <span class="text-info">REUNIDOS</span>
+            </a>
+            <span class="badge bg-warning text-dark ms-2 fs-6">⚙️ Panel Admin</span>
+
+            <div class="ms-auto d-flex align-items-center gap-3">
+                <!-- Datos del administrador logueado -->
+                <div class="d-flex align-items-center gap-2">
+                    <img id="admin-avatar"
+                         src=""
+                         class="rounded-circle border border-secondary"
+                         width="34" height="34"
+                         alt="Avatar del administrador" />
+                    <span class="text-white small fw-semibold" id="admin-nombre">Admin</span>
+                </div>
+                <!-- Cerrar sesión: admin.js elimina "session" de localStorage -->
+                <a href="#" id="btn-logout-admin" class="btn btn-sm btn-outline-danger">
+                    Cerrar Sesión
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ============================================================
+         CONTENIDO PRINCIPAL
+    ============================================================ -->
+    <main class="container my-4">
+
+        <!-- Spinner visible mientras se cargan los datos via fetch -->
+        <div id="spinner-carga" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2 text-muted">Cargando datos de usuarios desde el servidor…</p>
+        </div>
+
+        <!-- Alerta de error inline (oculta por defecto) -->
+        <div id="alerta-panel" class="alert alert-danger d-none" role="alert"></div>
+
+        <!-- Cabecera del panel con botón de recarga -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold mb-0">
+                Panel de Administración
+            </h2>
+            <!-- Recargar: admin.js invalida la caché y vuelve a hacer fetch -->
+            <button id="btn-recargar" class="btn btn-outline-secondary btn-sm">
+                🔄 Recargar datos
+            </button>
+        </div>
+
+        <!-- ========================================================
+             TARJETAS DE ESTADÍSTICAS
+             Los valores son rellenados por admin.js tras cargar los datos.
+        ======================================================== -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card stat-card total shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="text-muted small mb-1">Total de usuarios</div>
+                        <div class="fs-2 fw-bold text-primary" id="total-usuarios">–</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stat-card mejor shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="text-muted small mb-1">Mayor puntuación</div>
+                        <div class="fs-2 fw-bold text-success" id="mejor-puntuacion">–</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stat-card media shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="text-muted small mb-1">Puntuación media</div>
+                        <div class="fs-2 fw-bold text-warning" id="media-puntuacion">–</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================
+             GRÁFICA DE BARRAS (Chart.js)
+             Muestra el nº de usuarios en el título y sus puntuaciones
+             en el eje Y. admin.js inicializa el canvas #grafica-usuarios.
+        ======================================================== -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-dark text-white fw-bold">
+                📊 Gráfica de Usuarios y Puntuaciones
+            </div>
+            <div class="card-body">
+                <canvas id="grafica-usuarios"></canvas>
+            </div>
+        </div>
+
+        <!-- ========================================================
+             TABLA DE USUARIOS (DataTables)
+             Columnas: ID Alumno | Nombre Alumno | Usuario | Puntuación | Rol | Acciones
+             Los botones Editar/Eliminar están generados por admin.js
+             dentro de la columna "Acciones".
+        ======================================================== -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark text-white fw-bold">
+                📋 Listado de Usuarios
+            </div>
+            <div class="card-body table-responsive">
+                <table id="tabla-usuarios"
+                       class="table table-striped table-hover w-100 align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID Alumno</th>
+                            <th>Nombre Alumno</th>
+                            <th>Usuario</th>
+                            <th>Puntuación</th>
+                            <th>Rol</th>
+                            <th class="dt-acciones">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ============================================================
+         FOOTER
+    ============================================================ -->
+    <footer class="bg-dark text-white py-3 mt-auto">
+        <div class="container text-center">
+            <p class="mb-0 small text-secondary">
+                JUEGOS <span class="text-info">REUNIDOS</span> – Panel de Administración
+            </p>
+        </div>
+    </footer>
+
+    <!-- ============================================================
+         MODAL DE EDICIÓN
+         Se abre cuando el admin pulsa "Editar" en la tabla.
+         admin.js rellena los campos y gestiona el submit.
+    ============================================================ -->
+    <div class="modal fade" id="modal-editar" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title">✏️ Editar Usuario</h5>
+                    <button type="button"
+                            class="btn-close btn-close-white"
+                            data-bs-dismiss="modal"
+                            aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- ID oculto para identificar al usuario al guardar -->
+                    <form id="frm-editar">
+                        <input type="hidden" id="edit-id" />
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Nombre Alumno</label>
+                            <input type="text"
+                                   id="edit-nombre"
+                                   class="form-control"
+                                   required
+                                   minlength="2"
+                                   placeholder="Nombre completo" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Puntuación</label>
+                            <input type="number"
+                                   id="edit-puntuacion"
+                                   class="form-control"
+                                   min="0"
+                                   required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Rol</label>
+                            <select id="edit-rol" class="form-select" required>
+                                <option value="user">Usuario</option>
+                                <option value="admin">Administrador</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Monedas</label>
+                            <input type="number"
+                                   id="edit-monedas"
+                                   class="form-control"
+                                   min="0"
+                                   required />
+                        </div>
+
+                        <div class="d-flex gap-2 justify-content-end">
+                            <button type="button"
+                                    class="btn btn-secondary"
+                                    data-bs-dismiss="modal">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-warning fw-bold">
+                                💾 Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         TOAST DE NOTIFICACIÓN
+         Aparece en la esquina inferior derecha tras editar/eliminar.
+    ============================================================ -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="toast-notif"
+             class="toast"
+             role="alert"
+             aria-live="assertive"
+             aria-atomic="true">
+            <div class="toast-header bg-dark text-white">
+                <strong class="me-auto">Panel Admin</strong>
+                <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="toast"
+                        aria-label="Cerrar"></button>
+            </div>
+            <div class="toast-body" id="toast-body"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         SCRIPTS
+         Orden importante:
+         1. jQuery         – requerido por DataTables
+         2. Bootstrap      – requerido para Modal y Toast
+         3. DataTables     – tabla interactiva + integración Bootstrap 5
+         4. Chart.js       – gráfica de barras
+         5. admin.js       – lógica del panel (fetch, CRUD, tabla, gráfica)
+    ============================================================ -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="../js/admin.js"></script>
+
+</body>
+</html>

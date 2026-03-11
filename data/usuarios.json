@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "user": "admin",
+    "nombre": "Jefe de Juegos",
+    "rol": "admin",
+    "puntuacion": 0,
+    "monedas": 99999
+  },
+  {
+    "id": 2,
+    "user": "user",
+    "nombre": "Usuario Ejemplo",
+    "rol": "user",
+    "puntuacion": 350,
+    "monedas": 150
+  },
+  {
+    "id": 3,
+    "user": "jugador1",
+    "nombre": "Ana García",
+    "rol": "user",
+    "puntuacion": 1200,
+    "monedas": 600
+  },
+  {
+    "id": 4,
+    "user": "jugador2",
+    "nombre": "Carlos López",
+    "rol": "user",
+    "puntuacion": 850,
+    "monedas": 425
+  },
+  {
+    "id": 5,
+    "user": "jugador3",
+    "nombre": "María Rodríguez",
+    "rol": "user",
+    "puntuacion": 2100,
+    "monedas": 1050
+  }
+]
