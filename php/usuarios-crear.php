@@ -3,8 +3,8 @@ header('Content-Type: application/json');
 
 $usuario = $_POST['usuario'] ?? '';
 $email = $_POST['email'] ?? '';
-$rol = $_POST['rol'] ?? '';        // frecuencia
-$tipo = $_POST['tipo'] ?? '';      // admin/jugador
+$rol = $_POST['rol'] ?? '';
+$tipo = $_POST['tipo'] ?? '';
 $password = $_POST['password'] ?? '';
 $puntuacion = isset($_POST['puntuacion']) ? (int)$_POST['puntuacion'] : 0;
 
@@ -23,7 +23,7 @@ $conn->begin_transaction();
 
 try {
   $stmt1 = $conn->prepare("INSERT INTO usuarios (idUsuario, usuario, email, telefono, fecha, genero, rol, tipo, juego_estrategia, juego_accion, juego_rpg, juego_puzzle, juego_carreras, password, fecha_registro)
-                           VALUES (NULL, ?, ?, '', '', '', ?, ?, 0, 0, 0, 0, 0, ?, NOW())");
+                           VALUES (NULL, ?, ?, '', '', 'no-decirlo', ?, ?, 0, 0, 0, 0, 0, ?, NOW())");
   $stmt1->bind_param("sssss", $usuario, $email, $rol, $tipo, $password);
   $stmt1->execute();
 

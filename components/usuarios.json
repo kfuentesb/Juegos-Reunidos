@@ -1,0 +1,6 @@
+[
+  { "idAlumno": 1, "usuario": "admin", "tipo": "admin", "puntuacion": 999 },
+  { "idAlumno": 2, "usuario": "maria", "tipo": "jugador", "puntuacion": 230 },
+  { "idAlumno": 3, "usuario": "lucas", "tipo": "jugador", "puntuacion": 120 },
+  { "idAlumno": 4, "usuario": "ana", "tipo": "jugador", "puntuacion": 410 }
+]
