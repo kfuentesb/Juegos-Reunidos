@@ -173,7 +173,7 @@ function insertarPestanaAdmin() {
   const li = document.createElement("li");
   li.className = "nav-item";
   li.innerHTML =
-    '<a class="nav-link text-warning fw-bold" id="nav-admin" href="Juegos%20Reunidos/components/admin.html">Panel Admin</a>';
+    '<a class="nav-link text-warning fw-bold" id="nav-admin" href="components/admin.html">Panel Admin</a>';
 
   navList.appendChild(li);
 }
