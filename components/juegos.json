@@ -1,0 +1,118 @@
+{
+  "tiposDeJuego": {
+    "juegosDeMesa": [
+      {
+        "nombre": "Catan",
+        "jugadores": [
+          {
+            "nombre": "Paco Jiménez",
+            "edad": 25,
+            "puntuacion": 150
+          },
+          {
+            "nombre": "Lola Gómez",
+            "edad": 28,
+            "puntuacion": 140
+          },
+          {
+            "nombre": "Yolanda Airado",
+            "edad": 22,
+            "puntuacion": 130
+          }
+        ],
+        "edadRecomendada": 10,
+        "categoria": "estrategia"
+      },
+      {
+        "nombre": "Risk",
+        "jugadores": [
+          {
+            "nombre": "Jorge Fernández",
+            "edad": 22,
+            "puntuacion": 300
+          },
+          {
+            "nombre": "Sonia Mantecón",
+            "edad": 25,
+            "puntuacion": 280
+          },
+          {
+            "nombre": "Luisa Pérez",
+            "edad": 30,
+            "puntuacion": 250
+          }
+        ],
+        "edadRecomendada": 12,
+        "categoria": "estrategia"
+      },
+      {
+        "nombre": "Codenames",
+        "jugadores": [
+          {
+            "nombre": "Diego Carrasco",
+            "edad": 30,
+            "puntuacion": 150
+          },
+          {
+            "nombre": "Juan Delcán",
+            "edad": 40,
+            "puntuacion": 100
+          },
+          {
+            "nombre": "Carmelo Pozuelo",
+            "edad": 50,
+            "puntuacion": 50
+          }
+        ],
+        "edadRecomendada": 10,
+        "categoria": "estrategia"
+      }
+    ],
+    "juegosOnline": [
+      {
+        "nombre": "ParchisOnline",
+        "jugadores": [
+          {
+            "nombre": "Luis Rosales",
+            "edad": 50,
+            "puntuacion": 500
+          },
+          {
+            "nombre": "José Martínez",
+            "edad": 40,
+            "puntuacion": 400
+          },
+          {
+            "nombre": "Javier Delgado",
+            "edad": 30,
+            "puntuacion": 30
+          }
+        ],
+        "edadRecomendada": 8,
+        "categoria": "familiar"
+      },
+      {
+        "nombre": "AjedrezOnline",
+        "jugadores": [
+          {
+            "nombre": "Carlos Alcaraz",
+            "edad": 20,
+            "puntuacion": 200
+          },
+          {
+            "nombre": "Rafa Nadal",
+            "edad": 38,
+            "puntuacion": 180
+          },
+          {
+            "nombre": "Pedro Casado",
+            "edad": 50,
+            "puntuacion": 170
+          }
+        ],
+        "edadRecomendada": 10,
+        "categoria": "estrategia"
+      }
+    ]
+  }
+}
