@@ -52,8 +52,9 @@ function renderGraficoTipos(lista) {
   // Contar usuarios por tipo
   const conteo = {};
   lista.forEach(u => {
+    // Si no tiene atributo tipo, se le asigna "jugador" por defecto
     const tipo = u.tipo || "jugador";
-    conteo[tipo] = (conteo[tipo] || 0) + 1;
+    conteo[tipo] = (conteo[tipo] || 0) + 1; // Acumula la cantidad por cada tipo
   });
 
   // Destruye el gráfico existente si lo hay, para evitar superposición
@@ -61,20 +62,26 @@ function renderGraficoTipos(lista) {
 
   // Crea el nuevo gráfico tipo doughnut usando Chart.js
   const ctx = document.getElementById("grafico-usuarios").getContext("2d");
+  // Instancia el gráfico usando la cuenta de tipos y sus cantidades
   chartTipos = new Chart(ctx, {
-    type: "doughnut",
+    type: "doughnut", // Especifica que el gráfico será de tipo donut
     data: {
+      // Los tipos se usan como etiquetas (ej: "admin", "jugador", etc.)
       labels: Object.keys(conteo),
       datasets: [{
         label: "Usuarios por tipo",
+        // La cantidad de usuarios por cada tipo
         data: Object.values(conteo),
+        // Colores de cada segmento del gráfico
         backgroundColor: ["#0d6efd", "#20c997", "#fd7e14", "#dc3545"],
-        borderWidth: 2
+        borderWidth: 2 // Grosor del borde del segmento
       }]
     },
     options: {
-      responsive: true,
-      plugins: { legend: { position: "bottom" } }
+      responsive: true, // Hace que el gráfico sea adaptable al tamaño del contenedor/pantalla
+      plugins: {
+        legend: { position: "bottom" } // Coloca la leyenda debajo del gráfico
+      }
     }
   });
 }
@@ -88,32 +95,44 @@ function renderGraficoTipos(lista) {
  * @param {Array} lista Lista de usuarios
  */
 function renderGraficoPuntuaciones(lista) {
-  // Ordena los usuarios de mayor a menor puntuación
+  // Ordena los usuarios de mayor a menor puntuación.
+  // Si algún usuario no tiene puntuación, se toma como 0.
   const ordenados = [...lista].sort((a, b) => (b.puntuacion ?? 0) - (a.puntuacion ?? 0));
+
+  // Extrae los nombres de usuario para usarlos como etiquetas del gráfico.
   const nombres = ordenados.map(u => u.usuario);
+
+  // Extrae las puntuaciones para cada usuario (con 0 por defecto si es undefined).
   const puntos = ordenados.map(u => u.puntuacion ?? 0);
 
-  // Destruye el gráfico anterior si lo hay
+  // Si existe un gráfico anterior de puntuaciones, lo destruye para evitar superposiciones.
   if (chartPuntuacion) chartPuntuacion.destroy();
 
-  // Crea el gráfico de barras
+  // Obtiene el contexto 2D del canvas donde se mostrará el gráfico.
   const ctx = document.getElementById("grafico-puntuaciones").getContext("2d");
+
+  // Crea un nuevo gráfico de barras con Chart.js.
   chartPuntuacion = new Chart(ctx, {
-    type: "bar",
+    type: "bar", // Especifica que el gráfico es de barras.
     data: {
-      labels: nombres,
+      labels: nombres, // Etiquetas en el eje X: nombres de los usuarios.
       datasets: [{
+        // Etiqueta del dataset, también muestra la cantidad de usuarios.
         label: `Puntuación (${lista.length} usuarios)`,
-        data: puntos,
-        backgroundColor: "rgba(13, 110, 253, 0.7)",
-        borderColor: "#0d6efd",
-        borderWidth: 1,
-        borderRadius: 4
+        data: puntos, // Valores para cada barra: la puntuación de cada usuario.
+        backgroundColor: "rgba(13, 110, 253, 0.7)", // Color de fondo de las barras.
+        borderColor: "#0d6efd", // Color del borde de las barras.
+        borderWidth: 1,         // Grosor del borde.
+        borderRadius: 4         // Bordes redondeados en las barras.
       }]
     },
     options: {
-      responsive: true,
-      scales: { y: { beginAtZero: true } }
+      responsive: true, // El gráfico se adapta al tamaño del contenedor.
+      scales: {
+        y: {
+          beginAtZero: true // El eje Y comienza en cero para mayor claridad.
+        }
+      }
     }
   });
 }
@@ -171,26 +190,40 @@ function renderTablaUsuarios(lista) {
   });
 
   // Evento para el botón de editar usuario
-  $("#tabla-usuarios").off("click", ".editar-usuario").on("click", ".editar-usuario", function () {
+$("#tabla-usuarios").off("click", ".editar-usuario").on("click", ".editar-usuario", function () {
+    // Obtiene el nombre del usuario del atributo data-usuario del botón que se clickeó
     const usuario = $(this).data("usuario");
+
+    // Busca en el array 'usuarios' la fila/objeto que corresponde a ese usuario
     const fila = usuarios.find(r => r.usuario === usuario);
+
+    // Si no encuentra el usuario, termina la función (no hace nada más)
     if (!fila) return;
 
-    $("#edit-usuario-hidden").val(fila.usuario);
-    $("#edit-usuario").val(fila.usuario);
-    $("#edit-tipo").val(fila.tipo);
-    $("#edit-puntuacion").val(fila.puntuacion);
+    // Llena los campos del formulario de edición con los datos encontrados
+    $("#edit-usuario-hidden").val(fila.usuario);    // Campo oculto, posiblemente para enviar el valor original
+    $("#edit-usuario").val(fila.usuario);           // Campo de nombre de usuario visible/editable
+    $("#edit-tipo").val(fila.tipo);                 // Campo del tipo de usuario
+    $("#edit-puntuacion").val(fila.puntuacion);     // Campo de puntuación
 
+    // Muestra el modal de edición (si la variable editModal existe y es válida)
     editModal?.show();
-  });
+});
 
-  // Evento para el botón de eliminar usuario
-  $("#tabla-usuarios").off("click", ".eliminar-usuario").on("click", ".eliminar-usuario", function () {
+// Evento para el botón de eliminar usuario
+$("#tabla-usuarios").off("click", ".eliminar-usuario").on("click", ".eliminar-usuario", function () {
+    // Obtiene el nombre de usuario del botón que se clickeó
     const usuario = $(this).data("usuario");
+
+    // Pregunta al usuario si realmente desea eliminar al usuario especificado
     if (!confirm(`¿Eliminar al usuario "${usuario}"?`)) return;
+
+    // Si se confirma, elimina el usuario del array 'usuarios', filtrando todos los que no coinciden
     usuarios = usuarios.filter(u => u.usuario !== usuario);
+
+    // Llama a la función recargarPanel() para actualizar la tabla/pantalla después de la eliminación
     recargarPanel();
-  });
+});
 }
 
 // ================================================================
