@@ -28,12 +28,16 @@
       margin-bottom: 1rem;
     }
     .table-responsive {
-      max-height: 420px;
+      max-height: 600px;
       overflow-y: auto;
     }
     .badge-total {
       font-size: 1rem;
       padding: .4em .8em;
+    }
+    .intereses-badge {
+      font-size: 0.75em;
+      margin: 2px;
     }
     /* Estilos para la sección de juegos */
     .games-filter-section {
@@ -107,16 +111,21 @@
 
     <!-- TABLA USUARIOS -->
     <section class="mb-5">
-      <div class="admin-section-title">Alumnos registrados</div>
+      <div class="admin-section-title">Usuarios Registrados</div>
       <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle nowrap w-100" id="tabla-usuarios">
           <thead class="table-dark">
             <tr>
               <th>#</th>
-              <th>ID Alumno</th>
               <th>Usuario</th>
-              <th>Puntuación</th>
+              <th>Email</th>
+              <th>Teléfono</th>
+              <th>Fecha Nac.</th>
+              <th>Género</th>
+              <th>Frecuencia</th>
+              <th>Intereses</th>
               <th>Tipo</th>
+              <th>Puntuación</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -168,9 +177,9 @@
     </section>
   </main>
 
-  <!-- MODAL CREAR -->
+  <!-- MODAL CREAR USUARIO -->
   <div class="modal fade" id="addUserModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content">
         <form id="addUserForm">
           <div class="modal-header bg-dark text-white">
@@ -178,50 +187,103 @@
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
-            <div class="mb-3">
-              <label class="form-label fw-bold">Usuario</label>
-              <input type="text" id="add-usuario" class="form-control" required />
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Usuario *</label>
+                <input type="text" id="add-usuario" class="form-control" required />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Email *</label>
+                <input type="email" id="add-email" class="form-control" required />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Teléfono *</label>
+                <input type="tel" id="add-telefono" class="form-control" maxlength="9" required />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Fecha de Nacimiento *</label>
+                <input type="date" id="add-fecha" class="form-control" required />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Género *</label>
+                <select id="add-genero" class="form-select" required>
+                  <option value="masculino">Masculino</option>
+                  <option value="femenino">Femenino</option>
+                  <option value="no-decirlo" selected>Prefiero no decirlo</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Frecuencia de Juego *</label>
+                <select id="add-rol" class="form-select" required>
+                  <option value="a-diario">A diario</option>
+                  <option value="semanalmente">Semanalmente</option>
+                  <option value="ocasionalmente">Ocasionalmente</option>
+                </select>
+              </div>
             </div>
             <div class="mb-3">
-              <label class="form-label fw-bold">Correo</label>
-              <input type="email" id="add-email" class="form-control" required />
+              <label class="form-label fw-bold d-block">Intereses</label>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="add-estrategia" value="1" />
+                <label class="form-check-label" for="add-estrategia">Estrategia</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="add-accion" value="1" />
+                <label class="form-check-label" for="add-accion">Acción</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="add-rpg" value="1" />
+                <label class="form-check-label" for="add-rpg">RPG</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="add-puzzle" value="1" />
+                <label class="form-check-label" for="add-puzzle">Puzzles</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="add-carreras" value="1" />
+                <label class="form-check-label" for="add-carreras">Carreras</label>
+              </div>
             </div>
-            <div class="mb-3">
-              <label class="form-label fw-bold">Tipo</label>
-              <select id="add-tipo" class="form-select" required>
-                <option value="jugador">jugador</option>
-                <option value="admin">admin</option>
-              </select>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Tipo de Usuario *</label>
+                <select id="add-tipo" class="form-select" required>
+                  <option value="jugador" selected>Jugador</option>
+                  <option value="admin">Administrador</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Puntuación Inicial</label>
+                <input type="number" id="add-puntuacion" class="form-control" min="0" value="0" />
+              </div>
             </div>
-            <div class="mb-3">
-              <label class="form-label fw-bold">Frecuencia</label>
-              <select id="add-rol" class="form-select" required>
-                <option value="a-diario">a-diario</option>
-                <option value="semanalmente">semanalmente</option>
-                <option value="ocasionalmente">ocasionalmente</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-bold">Contraseña</label>
-              <input type="password" id="add-password" class="form-control" required />
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-bold">Puntuación</label>
-              <input type="number" id="add-puntuacion" class="form-control" min="0" value="0" />
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Contraseña *</label>
+                <input type="password" id="add-password" class="form-control" required />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Repetir Contraseña *</label>
+                <input type="password" id="add-password2" class="form-control" required />
+              </div>
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-success fw-bold">Crear</button>
+            <button type="submit" class="btn btn-success fw-bold">Crear Usuario</button>
           </div>
         </form>
       </div>
     </div>
   </div>
 
-  <!-- MODAL EDITAR -->
+  <!-- MODAL EDITAR USUARIO -->
   <div class="modal fade" id="editUserModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content">
         <form id="editUserForm">
           <div class="modal-header bg-dark text-white">
@@ -229,38 +291,89 @@
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
-            <input type="hidden" id="edit-usuario-hidden" />
-            <div class="mb-3">
-              <label class="form-label fw-bold">Usuario</label>
-              <input type="text" id="edit-usuario" class="form-control" />
+            <input type="hidden" id="edit-usuario-original" />
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Usuario *</label>
+                <input type="text" id="edit-usuario" class="form-control" required />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Email *</label>
+                <input type="email" id="edit-email" class="form-control" required />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Teléfono *</label>
+                <input type="tel" id="edit-telefono" class="form-control" maxlength="9" required />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Fecha de Nacimiento *</label>
+                <input type="date" id="edit-fecha" class="form-control" required />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Género *</label>
+                <select id="edit-genero" class="form-select" required>
+                  <option value="masculino">Masculino</option>
+                  <option value="femenino">Femenino</option>
+                  <option value="no-decirlo">Prefiero no decirlo</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Frecuencia de Juego *</label>
+                <select id="edit-rol" class="form-select" required>
+                  <option value="a-diario">A diario</option>
+                  <option value="semanalmente">Semanalmente</option>
+                  <option value="ocasionalmente">Ocasionalmente</option>
+                </select>
+              </div>
             </div>
             <div class="mb-3">
-              <label class="form-label fw-bold">Correo</label>
-              <input type="email" id="edit-email" class="form-control" required />
+              <label class="form-label fw-bold d-block">Intereses</label>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="edit-estrategia" value="1" />
+                <label class="form-check-label" for="edit-estrategia">Estrategia</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="edit-accion" value="1" />
+                <label class="form-check-label" for="edit-accion">Acción</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="edit-rpg" value="1" />
+                <label class="form-check-label" for="edit-rpg">RPG</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="edit-puzzle" value="1" />
+                <label class="form-check-label" for="edit-puzzle">Puzzles</label>
+              </div>
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="edit-carreras" value="1" />
+                <label class="form-check-label" for="edit-carreras">Carreras</label>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Tipo de Usuario *</label>
+                <select id="edit-tipo" class="form-select" required>
+                  <option value="jugador">Jugador</option>
+                  <option value="admin">Administrador</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Puntuación</label>
+                <input type="number" id="edit-puntuacion" class="form-control" min="0" />
+              </div>
             </div>
             <div class="mb-3">
-              <label class="form-label fw-bold">Tipo</label>
-              <select id="edit-tipo" class="form-select" required>
-                <option value="jugador">jugador</option>
-                <option value="admin">admin</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-bold">Frecuencia</label>
-              <select id="edit-rol" class="form-select" required>
-                <option value="a-diario">a-diario</option>
-                <option value="semanalmente">semanalmente</option>
-                <option value="ocasionalmente">ocasionalmente</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label class="form-label fw-bold">Puntuación</label>
-              <input type="number" id="edit-puntuacion" class="form-control" min="0" />
+              <label class="form-label fw-bold">Nueva Contraseña (dejar en blanco para mantener la actual)</label>
+              <input type="password" id="edit-password" class="form-control" />
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-info text-white fw-bold">Guardar cambios</button>
+            <button type="submit" class="btn btn-info text-white fw-bold">Guardar Cambios</button>
           </div>
         </form>
       </div>

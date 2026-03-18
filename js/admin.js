@@ -10,7 +10,7 @@ let chartPuntuacion = null;
 // Instancias de los modales de edición y agregado de usuarios
 let editModal = null;
 let addModal = null;
-// Array principal de usuarios cargados del archivo usuarios.json
+// Array principal de usuarios cargados de la base de datos
 let usuarios = [];
 
 // =======================
@@ -23,21 +23,70 @@ let datosJuegos = null;
 let tablaJuegosInstancia = null;
 
 // =======================================
-// FUNCION AUXILIAR PARA PEDIR EL JSON
+// FUNCIONES FETCH PARA BASE DE DATOS
 // =======================================
 
 /**
- * Realiza una petición fetch y regresa el JSON de un archivo.
- * Lanza error si la petición falla.
+ * Obtiene la lista de usuarios desde la base de datos
+ * @returns {Promise<Array>} Lista de usuarios
  */
-function getJson(url) {
-  return fetch(url)
+function fetchUsuarios() {
+  return fetch('../php/usuarios-lista.php')
     .then(res => {
-      if (!res.ok) {
-        throw new Error(`No se pudo cargar ${url}: ${res.status}`);
-      }
+      if (!res.ok) throw new Error('Error al cargar usuarios');
       return res.json();
     });
+}
+
+/**
+ * Crea un nuevo usuario en la base de datos
+ * @param {FormData} formData Datos del usuario
+ * @returns {Promise<Object>} Respuesta del servidor
+ */
+function fetchCrearUsuario(formData) {
+  return fetch('../php/usuarios-crear.php', {
+    method: 'POST',
+    body: formData
+  })
+  .then(res => {
+    if (!res.ok) throw new Error('Error al crear usuario');
+    return res.json();
+  });
+}
+
+/**
+ * Actualiza un usuario en la base de datos
+ * @param {FormData} formData Datos del usuario
+ * @returns {Promise<Object>} Respuesta del servidor
+ */
+function fetchActualizarUsuario(formData) {
+  return fetch('../php/usuarios-actualizar.php', {
+    method: 'POST',
+    body: formData
+  })
+  .then(res => {
+    if (!res.ok) throw new Error('Error al actualizar usuario');
+    return res.json();
+  });
+}
+
+/**
+ * Elimina un usuario de la base de datos
+ * @param {string} usuario Nombre del usuario a eliminar
+ * @returns {Promise<Object>} Respuesta del servidor
+ */
+function fetchEliminarUsuario(usuario) {
+  const formData = new FormData();
+  formData.append('usuario', usuario);
+  
+  return fetch('../php/usuarios-eliminar.php', {
+    method: 'POST',
+    body: formData
+  })
+  .then(res => {
+    if (!res.ok) throw new Error('Error al eliminar usuario');
+    return res.json();
+  });
 }
 
 // ===========================================
@@ -49,38 +98,30 @@ function getJson(url) {
  * @param {Array} lista Lista de usuarios
  */
 function renderGraficoTipos(lista) {
-  // Contar usuarios por tipo
   const conteo = {};
   lista.forEach(u => {
-    // Si no tiene atributo tipo, se le asigna "jugador" por defecto
     const tipo = u.tipo || "jugador";
-    conteo[tipo] = (conteo[tipo] || 0) + 1; // Acumula la cantidad por cada tipo
+    conteo[tipo] = (conteo[tipo] || 0) + 1;
   });
 
-  // Destruye el gráfico existente si lo hay, para evitar superposición
   if (chartTipos) chartTipos.destroy();
 
-  // Crea el nuevo gráfico tipo doughnut usando Chart.js
   const ctx = document.getElementById("grafico-usuarios").getContext("2d");
-  // Instancia el gráfico usando la cuenta de tipos y sus cantidades
   chartTipos = new Chart(ctx, {
-    type: "doughnut", // Especifica que el gráfico será de tipo donut
+    type: "doughnut",
     data: {
-      // Los tipos se usan como etiquetas (ej: "admin", "jugador", etc.)
       labels: Object.keys(conteo),
       datasets: [{
         label: "Usuarios por tipo",
-        // La cantidad de usuarios por cada tipo
         data: Object.values(conteo),
-        // Colores de cada segmento del gráfico
         backgroundColor: ["#0d6efd", "#20c997", "#fd7e14", "#dc3545"],
-        borderWidth: 2 // Grosor del borde del segmento
+        borderWidth: 2
       }]
     },
     options: {
-      responsive: true, // Hace que el gráfico sea adaptable al tamaño del contenedor/pantalla
+      responsive: true,
       plugins: {
-        legend: { position: "bottom" } // Coloca la leyenda debajo del gráfico
+        legend: { position: "bottom" }
       }
     }
   });
@@ -95,43 +136,30 @@ function renderGraficoTipos(lista) {
  * @param {Array} lista Lista de usuarios
  */
 function renderGraficoPuntuaciones(lista) {
-  // Ordena los usuarios de mayor a menor puntuación.
-  // Si algún usuario no tiene puntuación, se toma como 0.
   const ordenados = [...lista].sort((a, b) => (b.puntuacion ?? 0) - (a.puntuacion ?? 0));
-
-  // Extrae los nombres de usuario para usarlos como etiquetas del gráfico.
   const nombres = ordenados.map(u => u.usuario);
-
-  // Extrae las puntuaciones para cada usuario (con 0 por defecto si es undefined).
   const puntos = ordenados.map(u => u.puntuacion ?? 0);
 
-  // Si existe un gráfico anterior de puntuaciones, lo destruye para evitar superposiciones.
   if (chartPuntuacion) chartPuntuacion.destroy();
 
-  // Obtiene el contexto 2D del canvas donde se mostrará el gráfico.
   const ctx = document.getElementById("grafico-puntuaciones").getContext("2d");
-
-  // Crea un nuevo gráfico de barras con Chart.js.
   chartPuntuacion = new Chart(ctx, {
-    type: "bar", // Especifica que el gráfico es de barras.
+    type: "bar",
     data: {
-      labels: nombres, // Etiquetas en el eje X: nombres de los usuarios.
+      labels: nombres,
       datasets: [{
-        // Etiqueta del dataset, también muestra la cantidad de usuarios.
         label: `Puntuación (${lista.length} usuarios)`,
-        data: puntos, // Valores para cada barra: la puntuación de cada usuario.
-        backgroundColor: "rgba(13, 110, 253, 0.7)", // Color de fondo de las barras.
-        borderColor: "#0d6efd", // Color del borde de las barras.
-        borderWidth: 1,         // Grosor del borde.
-        borderRadius: 4         // Bordes redondeados en las barras.
+        data: puntos,
+        backgroundColor: "rgba(13, 110, 253, 0.7)",
+        borderColor: "#0d6efd",
+        borderWidth: 1,
+        borderRadius: 4
       }]
     },
     options: {
-      responsive: true, // El gráfico se adapta al tamaño del contenedor.
+      responsive: true,
       scales: {
-        y: {
-          beginAtZero: true // El eje Y comienza en cero para mayor claridad.
-        }
+        y: { beginAtZero: true }
       }
     }
   });
@@ -142,38 +170,110 @@ function renderGraficoPuntuaciones(lista) {
 // =======================================================
 
 /**
+ * Formatea los intereses como badges
+ * @param {Object} u Usuario
+ * @returns {string} HTML con badges
+ */
+function formatearIntereses(u) {
+  const intereses = [];
+  if (parseInt(u.juego_estrategia)) intereses.push('<span class="badge bg-primary intereses-badge">Estrategia</span>');
+  if (parseInt(u.juego_accion)) intereses.push('<span class="badge bg-danger intereses-badge">Acción</span>');
+  if (parseInt(u.juego_rpg)) intereses.push('<span class="badge bg-success intereses-badge">RPG</span>');
+  if (parseInt(u.juego_puzzle)) intereses.push('<span class="badge bg-warning intereses-badge">Puzzles</span>');
+  if (parseInt(u.juego_carreras)) intereses.push('<span class="badge bg-info intereses-badge">Carreras</span>');
+  return intereses.length ? intereses.join(' ') : '<span class="text-muted">-</span>';
+}
+
+/**
+ * Formatea la fecha para mostrar
+ * @param {string} fecha Fecha en formato YYYY-MM-DD
+ * @returns {string} Fecha formateada
+ */
+function formatearFecha(fecha) {
+  if (!fecha) return '-';
+  const partes = fecha.split('-');
+  if (partes.length === 3) {
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+  }
+  return fecha;
+}
+
+/**
+ * Formatea el género para mostrar
+ * @param {string} genero Género
+ * @returns {string} Género formateado
+ */
+function formatearGenero(genero) {
+  const generos = {
+    'masculino': 'Masculino',
+    'femenino': 'Femenino',
+    'no-decirlo': 'No especificado'
+  };
+  return generos[genero] || genero;
+}
+
+/**
+ * Formatea la frecuencia para mostrar
+ * @param {string} rol Rol/frecuencia
+ * @returns {string} Frecuencia formateada
+ */
+function formatearFrecuencia(rol) {
+  const frecuencias = {
+    'a-diario': 'A diario',
+    'semanalmente': 'Semanalmente',
+    'ocasionalmente': 'Ocasionalmente'
+  };
+  return frecuencias[rol] || rol;
+}
+
+/**
  * Renderiza la tabla interactiva de usuarios usando DataTables.
- * Permite editar y eliminar usuarios desde la tabla.
  * @param {Array} lista Lista de usuarios
  */
 function renderTablaUsuarios(lista) {
-  // Prepara los datos para la tabla
   const data = lista.map((u, i) => ({
     index: i + 1,
-    idAlumno: u.idAlumno ?? "—",
     usuario: u.usuario,
-    tipo: u.tipo,
-    puntuacion: u.puntuacion ?? 0
+    email: u.email,
+    telefono: u.telefono || '-',
+    fecha: formatearFecha(u.fecha),
+    genero: formatearGenero(u.genero),
+    rol: formatearFrecuencia(u.rol),
+    intereses: formatearIntereses(u),
+    tipo: u.tipo || 'jugador',
+    puntuacion: u.puntuacion ?? 0,
+    rawData: u // Guardamos los datos originales para edición
   }));
 
-  // Si ya existe una tabla renderizada, la refresca con los nuevos datos
   if (tablaUsuarios) {
     tablaUsuarios.clear();
     tablaUsuarios.rows.add(data).draw();
     return;
   }
 
-  // Inicializa la DataTable
   tablaUsuarios = $("#tabla-usuarios").DataTable({
     data,
     responsive: true,
     language: { url: "//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json" },
     columns: [
       { data: "index", title: "#", width: "40px" },
-      { data: "idAlumno", title: "ID Alumno", width: "80px" },
       { data: "usuario", title: "Usuario" },
-      { data: "puntuacion", title: "Puntuación", width: "100px" },
-      { data: "tipo", title: "Tipo", width: "100px" },
+      { data: "email", title: "Email" },
+      { data: "telefono", title: "Teléfono", width: "100px" },
+      { data: "fecha", title: "Fecha Nac.", width: "100px" },
+      { data: "genero", title: "Género", width: "100px" },
+      { data: "rol", title: "Frecuencia", width: "110px" },
+      { data: "intereses", title: "Intereses", orderable: false },
+      { 
+        data: "tipo", 
+        title: "Tipo", 
+        width: "80px",
+        render: function(data) {
+          const badgeClass = data === 'admin' ? 'bg-danger' : 'bg-primary';
+          return `<span class="badge ${badgeClass}">${data}</span>`;
+        }
+      },
+      { data: "puntuacion", title: "Puntuación", width: "90px" },
       {
         data: null,
         title: "Acciones",
@@ -190,54 +290,74 @@ function renderTablaUsuarios(lista) {
   });
 
   // Evento para el botón de editar usuario
-$("#tabla-usuarios").off("click", ".editar-usuario").on("click", ".editar-usuario", function () {
-    // Obtiene el nombre del usuario del atributo data-usuario del botón que se clickeó
+  $("#tabla-usuarios").off("click", ".editar-usuario").on("click", ".editar-usuario", function () {
     const usuario = $(this).data("usuario");
-
-    // Busca en el array 'usuarios' la fila/objeto que corresponde a ese usuario
     const fila = usuarios.find(r => r.usuario === usuario);
-
-    // Si no encuentra el usuario, termina la función (no hace nada más)
     if (!fila) return;
 
-    // Llena los campos del formulario de edición con los datos encontrados
-    $("#edit-usuario-hidden").val(fila.usuario);    // Campo oculto, posiblemente para enviar el valor original
-    $("#edit-usuario").val(fila.usuario);           // Campo de nombre de usuario visible/editable
-    $("#edit-tipo").val(fila.tipo);                 // Campo del tipo de usuario
-    $("#edit-puntuacion").val(fila.puntuacion);     // Campo de puntuación
+    // Llenar el formulario de edición
+    $("#edit-usuario-original").val(fila.usuario);
+    $("#edit-usuario").val(fila.usuario);
+    $("#edit-email").val(fila.email);
+    $("#edit-telefono").val(fila.telefono || '');
+    $("#edit-fecha").val(fila.fecha || '');
+    $("#edit-genero").val(fila.genero || 'no-decirlo');
+    $("#edit-rol").val(fila.rol || 'a-diario');
+    $("#edit-tipo").val(fila.tipo || 'jugador');
+    $("#edit-puntuacion").val(fila.puntuacion || 0);
+    $("#edit-password").val('');
 
-    // Muestra el modal de edición (si la variable editModal existe y es válida)
+    // Intereses (checkboxes)
+    $("#edit-estrategia").prop('checked', parseInt(fila.juego_estrategia) === 1);
+    $("#edit-accion").prop('checked', parseInt(fila.juego_accion) === 1);
+    $("#edit-rpg").prop('checked', parseInt(fila.juego_rpg) === 1);
+    $("#edit-puzzle").prop('checked', parseInt(fila.juego_puzzle) === 1);
+    $("#edit-carreras").prop('checked', parseInt(fila.juego_carreras) === 1);
+
     editModal?.show();
-});
+  });
 
-// Evento para el botón de eliminar usuario
-$("#tabla-usuarios").off("click", ".eliminar-usuario").on("click", ".eliminar-usuario", function () {
-    // Obtiene el nombre de usuario del botón que se clickeó
+  // Evento para el botón de eliminar usuario
+  $("#tabla-usuarios").off("click", ".eliminar-usuario").on("click", ".eliminar-usuario", function () {
     const usuario = $(this).data("usuario");
+    if (!confirm(`¿Eliminar al usuario "${usuario}"?\n\nEsta acción no se puede deshacer.`)) return;
 
-    // Pregunta al usuario si realmente desea eliminar al usuario especificado
-    if (!confirm(`¿Eliminar al usuario "${usuario}"?`)) return;
-
-    // Si se confirma, elimina el usuario del array 'usuarios', filtrando todos los que no coinciden
-    usuarios = usuarios.filter(u => u.usuario !== usuario);
-
-    // Llama a la función recargarPanel() para actualizar la tabla/pantalla después de la eliminación
-    recargarPanel();
-});
+    fetchEliminarUsuario(usuario)
+      .then(data => {
+        if (data.success) {
+          alert('Usuario eliminado correctamente');
+          cargarUsuarios();
+        } else {
+          alert('Error: ' + (data.message || 'No se pudo eliminar el usuario'));
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Error al eliminar el usuario');
+      });
+  });
 }
 
 // ================================================================
-// FUNCIÓN PRINCIPAL PARA REFRESCAR DATOS Y GRAFICOS DEL PANEL
+// FUNCIÓN PRINCIPAL PARA CARGAR Y MOSTRAR USUARIOS
 // ================================================================
 
 /**
- * Actualiza el panel de usuarios mostrando la cantidad total, gráficos y tabla.
+ * Carga los usuarios desde la base de datos y actualiza la interfaz
  */
-function recargarPanel() {
-  document.getElementById("total-usuarios-badge").textContent = usuarios.length;
-  renderGraficoTipos(usuarios);
-  renderGraficoPuntuaciones(usuarios);
-  renderTablaUsuarios(usuarios);
+function cargarUsuarios() {
+  fetchUsuarios()
+    .then(data => {
+      usuarios = data;
+      document.getElementById("total-usuarios-badge").textContent = usuarios.length;
+      renderGraficoTipos(usuarios);
+      renderGraficoPuntuaciones(usuarios);
+      renderTablaUsuarios(usuarios);
+    })
+    .catch(err => {
+      console.error('Error cargando usuarios:', err);
+      alert('Error al cargar los usuarios desde la base de datos');
+    });
 }
 
 // ============================================================
@@ -246,8 +366,6 @@ function recargarPanel() {
 
 /**
  * Carga los datos de juegos desde un archivo JSON.
- * Intenta primero desde ../components/juegos.json y si falla, prueba juegos.json en el mismo directorio.
- * Almacena el resultado en la variable global datosJuegos.
  */
 function cargarDatosJuegos() {
   return fetch('../components/juegos.json')
@@ -259,17 +377,15 @@ function cargarDatosJuegos() {
     })
     .then(data => {
       datosJuegos = data;
-      console.log('Juegos cargados correctamente desde components/juegos.json');
+      console.log('Juegos cargados correctamente');
       return data;
     })
     .catch(error => {
       console.error('Error cargando juegos:', error);
-      // Si falla, intenta cargar desde una ruta alternativa
       return fetch('juegos.json')
         .then(r => r.json())
         .then(data => {
           datosJuegos = data;
-          console.log('Juegos cargados desde ruta alternativa');
           return data;
         })
         .catch(e => {
@@ -280,14 +396,12 @@ function cargarDatosJuegos() {
 
 /**
  * Muestra la tabla de juegos de acuerdo al tipo seleccionado en el filtro.
- * Permite visualizar jugadores, puntuaciones y detalles del juego.
  */
 function mostrarTablaJuegos() {
   const tipoSeleccionado = document.getElementById('filtro-tipo-juego').value;
   const tabla = document.getElementById('tabla-juegos');
   const mensaje = document.getElementById('mensaje-seleccion-juegos');
 
-  // Si no se ha seleccionado ningún tipo de juego
   if (!tipoSeleccionado) {
     tabla.style.display = 'none';
     mensaje.style.display = 'block';
@@ -298,18 +412,15 @@ function mostrarTablaJuegos() {
     return;
   }
 
-  // Validar que los datos de juegos estén cargados
   if (!datosJuegos || !datosJuegos.tiposDeJuego) {
     console.error('No hay datos de juegos cargados');
     alert('Error: No se pudieron cargar los datos de juegos');
     return;
   }
 
-  // Mostrar la tabla y ocultar el mensaje
   mensaje.style.display = 'none';
   tabla.style.display = 'table';
 
-  // Obtener los juegos del tipo seleccionado
   const juegos = datosJuegos.tiposDeJuego[tipoSeleccionado];
   
   if (!juegos) {
@@ -317,13 +428,11 @@ function mostrarTablaJuegos() {
     return;
   }
 
-  // Preparar los datos para la DataTable
   const datosTabla = [];
   
   juegos.forEach(juego => {
     juego.jugadores.forEach((jugador, index) => {
       datosTabla.push({
-        // ALL DATOS
         juego: index === 0 ? juego.nombre : '',
         jugador: jugador.nombre,
         edadJugador: jugador.edad,
@@ -336,12 +445,10 @@ function mostrarTablaJuegos() {
     });
   });
 
-  // Destruir la tabla anterior si existe
   if (tablaJuegosInstancia) {
     tablaJuegosInstancia.destroy();
   }
 
-  // Inicializar la DataTable de juegos
   tablaJuegosInstancia = $('#tabla-juegos').DataTable({
     data: datosTabla,
     responsive: true,
@@ -355,7 +462,6 @@ function mostrarTablaJuegos() {
         title: 'Juego',
         render: function(data, type, row) {
           if (row.esPrimeraFila && data) {
-            // juego resaltado
             return `<strong style="background: #e9ecef; padding: 5px 10px; border-radius: 5px; display: inline-block;">${data}</strong>`;
           }
           return data;
@@ -392,7 +498,6 @@ function mostrarTablaJuegos() {
     ],
     order: [],
     createdRow: function(row, data, dataIndex) {
-      // Marca las filas de jugador con una clase
       if (!data.esPrimeraFila) {
         $(row).addClass('jugador-row');
       }
@@ -405,24 +510,16 @@ function mostrarTablaJuegos() {
 // ========================================================================
 
 document.addEventListener("DOMContentLoaded", function () {
-  // Inicializa los modales de Bootstrap para editar/agregar usuarios
+  // Inicializa los modales de Bootstrap
   if (window.bootstrap?.Modal) {
     editModal = new bootstrap.Modal(document.getElementById("editUserModal"));
     addModal = new bootstrap.Modal(document.getElementById("addUserModal"));
   }
 
-  // Carga el listado de usuarios al iniciar
-  getJson("usuarios.json")
-    .then(data => {
-      usuarios = data;
-      recargarPanel();
-    })
-    .catch(e => {
-      alert("No se pudo cargar usuarios.json: " + e.message);
-      console.error(e);
-    });
+  // Carga los usuarios desde la base de datos
+  cargarUsuarios();
 
-  // Carga los datos de juegos al iniciar
+  // Carga los datos de juegos
   cargarDatosJuegos();
 
   // ======================
@@ -435,54 +532,96 @@ document.addEventListener("DOMContentLoaded", function () {
     addModal?.show();
   });
 
-  // Evento submit para agregar usuario desde el formulario
+  // Evento submit para agregar usuario
   document.getElementById("addUserForm")?.addEventListener("submit", function (e) {
     e.preventDefault();
-    const usuario = document.getElementById("add-usuario").value.trim();
-    const tipo = document.getElementById("add-tipo").value;
-    const puntuacion = parseInt(document.getElementById("add-puntuacion").value, 10) || 0;
-    // Calcula el siguiente idAlumno correlativo
-    const idAlumno = usuarios.length > 0 ? Math.max(...usuarios.map(u => u.idAlumno || 0)) + 1 : 1;
-    
-    if (!usuario) return alert("Usuario es obligatorio");
-    if (usuarios.some(u => u.usuario === usuario)) return alert("Usuario ya existe");
-    
-    usuarios.push({ idAlumno, usuario, tipo, puntuacion });
-    addModal?.hide();
-    recargarPanel();
+
+    const password = document.getElementById("add-password").value;
+    const password2 = document.getElementById("add-password2").value;
+
+    if (password !== password2) {
+      alert('Las contraseñas no coinciden');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('usuario', document.getElementById("add-usuario").value.trim());
+    formData.append('email', document.getElementById("add-email").value.trim());
+    formData.append('telefono', document.getElementById("add-telefono").value.trim());
+    formData.append('fecha', document.getElementById("add-fecha").value);
+    formData.append('genero', document.getElementById("add-genero").value);
+    formData.append('rol', document.getElementById("add-rol").value);
+    formData.append('tipo', document.getElementById("add-tipo").value);
+    formData.append('password', password);
+    formData.append('puntuacion', document.getElementById("add-puntuacion").value || 0);
+    formData.append('juego_estrategia', document.getElementById("add-estrategia").checked ? 1 : 0);
+    formData.append('juego_accion', document.getElementById("add-accion").checked ? 1 : 0);
+    formData.append('juego_rpg', document.getElementById("add-rpg").checked ? 1 : 0);
+    formData.append('juego_puzzle', document.getElementById("add-puzzle").checked ? 1 : 0);
+    formData.append('juego_carreras', document.getElementById("add-carreras").checked ? 1 : 0);
+
+    fetchCrearUsuario(formData)
+      .then(data => {
+        if (data.success) {
+          alert('Usuario creado correctamente');
+          addModal?.hide();
+          cargarUsuarios();
+        } else {
+          alert('Error: ' + (data.message || 'No se pudo crear el usuario'));
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Error al crear el usuario');
+      });
   });
 
-  // Evento submit para editar usuario usando jQuery
-  $("#editUserForm").off("submit").on("submit", function (e) {
+  // Evento submit para editar usuario
+  document.getElementById("editUserForm")?.addEventListener("submit", function (e) {
     e.preventDefault();
-    const usuarioViejo = $("#edit-usuario-hidden").val();
-    const usuarioNuevo = $("#edit-usuario").val().trim();
-    const tipo = $("#edit-tipo").val();
-    const puntuacion = parseInt($("#edit-puntuacion").val(), 10) || 0;
+
+    const usuarioOriginal = document.getElementById("edit-usuario-original").value;
+    const password = document.getElementById("edit-password").value;
+
+    const formData = new FormData();
+    formData.append('usuario_original', usuarioOriginal);
+    formData.append('usuario', document.getElementById("edit-usuario").value.trim());
+    formData.append('email', document.getElementById("edit-email").value.trim());
+    formData.append('telefono', document.getElementById("edit-telefono").value.trim());
+    formData.append('fecha', document.getElementById("edit-fecha").value);
+    formData.append('genero', document.getElementById("edit-genero").value);
+    formData.append('rol', document.getElementById("edit-rol").value);
+    formData.append('tipo', document.getElementById("edit-tipo").value);
+    formData.append('puntuacion', document.getElementById("edit-puntuacion").value || 0);
+    formData.append('juego_estrategia', document.getElementById("edit-estrategia").checked ? 1 : 0);
+    formData.append('juego_accion', document.getElementById("edit-accion").checked ? 1 : 0);
+    formData.append('juego_rpg', document.getElementById("edit-rpg").checked ? 1 : 0);
+    formData.append('juego_puzzle', document.getElementById("edit-puzzle").checked ? 1 : 0);
+    formData.append('juego_carreras', document.getElementById("edit-carreras").checked ? 1 : 0);
     
-    if (!usuarioNuevo) {
-      alert("El nombre de usuario no puede estar vacío");
-      return;
+    if (password) {
+      formData.append('password', password);
     }
-    if (usuarioNuevo !== usuarioViejo && usuarios.some(u => u.usuario === usuarioNuevo)) {
-      alert("Ya existe un usuario con ese nombre");
-      return;
-    }
-    
-    // Actualiza los datos del usuario
-    usuarios = usuarios.map(u =>
-      u.usuario === usuarioViejo
-        ? { ...u, usuario: usuarioNuevo, tipo, puntuacion }
-        : u
-    );
-    editModal?.hide();
-    recargarPanel();
+
+    fetchActualizarUsuario(formData)
+      .then(data => {
+        if (data.success) {
+          alert('Usuario actualizado correctamente');
+          editModal?.hide();
+          cargarUsuarios();
+        } else {
+          alert('Error: ' + (data.message || 'No se pudo actualizar el usuario'));
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Error al actualizar el usuario');
+      });
   });
 
   // ======================
   // EVENTOS DE JUEGOS
   // ======================
 
-  // Evento cuando cambia el tipo de juego seleccionado
   document.getElementById('filtro-tipo-juego')?.addEventListener('change', mostrarTablaJuegos);
 });

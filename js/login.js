@@ -7,6 +7,7 @@ const btnLoginMain    = document.getElementById("btn-login-main");
 const userProfileMenu = document.getElementById("user-profile-menu");
 const loginModalEl    = document.getElementById("loginModal");
 const seccionRegistro = document.getElementById("registro-seccion");
+const linkVerPerfil   = document.getElementById("link-ver-perfil");
 
 // Modal bootstrap
 let loginModal = null;
@@ -49,27 +50,26 @@ const mostrarUIAnonimo = () => {
  * @param {string} params - Parámetros URL-encoded para enviar al servidor
  * @param {function} onOk  - Callback para exito
  * @param {function} onErr - Callback para error
- * AJA POST
  */
 const postAjax = (params, onOk, onErr) => {
-  const xhr = new XMLHttpRequest(); // Crear el XMLHttpRequest para hacer una petición HTTP
+  const xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function () {
-    if (this.readyState === 4) { // Si Operación completada
-      if (this.status === 200) { // HTTP 200 OK
-        try { 
-          const data = JSON.parse(this.responseText); // Objeto JS, sino es valido se captura
+    if (this.readyState === 4) {
+      if (this.status === 200) {
+        try {
+          const data = JSON.parse(this.responseText);
           onOk && onOk(data);
         } catch (err) {
           onErr && onErr("Respuesta inválida del servidor");
         }
-      } else { // Si no es 200, error
+      } else {
         onErr && onErr("Error de conexión con el servidor");
       }
     }
   };
   xhr.open("POST", "/Juegos%20Reunidos/php/procesar.php", true);
-  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded"); // Configuramos cabeceras en el formato nombre=Kevin&edad=20
-  xhr.send(params); // accion=login&usuario=Kevin&clave=1234
+  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  xhr.send(params);
 };
 
 /* =========================
@@ -141,6 +141,13 @@ function renderUserUI(usuario) {
 
   if ((usuario.rol || "").toLowerCase() === "admin") {
     insertarPestanaAdmin();
+  }
+
+  // Configurar enlace "Ver Perfil"
+  const linkVerPerfil = document.querySelector("#user-profile-menu .dropdown-item[href='#']");
+  if (linkVerPerfil && linkVerPerfil.textContent.includes("Ver Perfil")) {
+    linkVerPerfil.href = "components/perfil.html";
+    linkVerPerfil.onclick = null;
   }
 
   const btnLogout =

@@ -14,21 +14,28 @@ if ($conn->connect_error) {
 }
 
 // ======================================================
-// 2. Prepara la consulta SQL para unir usuarios/alumnos
+// 2. Prepara la consulta SQL para obtener todos los datos de usuarios
 // ======================================================
 
-// Selecciona datos de usuarios y puntuación de alumnos.
-// LEFT JOIN asegura que todos los usuarios aparecen aunque no sean alumnos.
-// COALESCE garantiza que si no hay puntuación (NULL), devuelve 0.
-$sql = "SELECT usuarios.usuario,
-               usuarios.email,
-               usuarios.rol,
-               usuarios.tipo,
-               alumnos.idAlumno,
-               COALESCE(alumnos.puntuacion, 0) AS puntuacion
-        FROM usuarios
-        LEFT JOIN alumnos ON usuarios.usuario = alumnos.alumno
-        ORDER BY usuarios.usuario ASC";
+// Selecciona todos los datos de usuarios y puntuación de alumnos.
+$sql = "SELECT 
+          u.usuario,
+          u.email,
+          u.telefono,
+          u.fecha,
+          u.genero,
+          u.rol,
+          u.juego_estrategia,
+          u.juego_accion,
+          u.juego_rpg,
+          u.juego_puzzle,
+          u.juego_carreras,
+          u.tipo,
+          u.password,
+          COALESCE(a.puntuacion, 0) AS puntuacion
+        FROM usuarios u
+        LEFT JOIN alumnos a ON u.usuario = a.alumno
+        ORDER BY u.usuario ASC";
 
 // Ejecuta la consulta y almacena el resultado
 $result = $conn->query($sql);
@@ -36,22 +43,29 @@ $result = $conn->query($sql);
 // ==============================
 // 3. Construye el array de salida
 // ==============================
-$usuarios = []; // Array que contendrá todos los usuarios con su info
+$usuarios = [];
 
 // Recorre cada fila de la consulta y la agrega al array
 while ($fila = $result->fetch_assoc()) {
   $usuarios[] = [
-    "idAlumno"   => $fila["idAlumno"] !== null ? (int)$fila["idAlumno"] : null, // Si no hay alumno, null
-    "usuario"    => $fila["usuario"],                                           // Nombre de usuario
-    "email"      => $fila["email"],                                             // Email del usuario
-    "rol"        => $fila["rol"],                                               // Rol/frecuencia, ej: 'a-diario'
-    "tipo"       => $fila["tipo"],                                              // Tipo, ej: 'admin' o 'jugador'
-    "puntuacion" => (int)$fila["puntuacion"]                                    // Siempre int; 0 si no hay
+    "usuario"           => $fila["usuario"],
+    "email"             => $fila["email"],
+    "telefono"          => $fila["telefono"],
+    "fecha"             => $fila["fecha"],
+    "genero"            => $fila["genero"],
+    "rol"               => $fila["rol"],
+    "juego_estrategia"  => (int)$fila["juego_estrategia"],
+    "juego_accion"      => (int)$fila["juego_accion"],
+    "juego_rpg"         => (int)$fila["juego_rpg"],
+    "juego_puzzle"      => (int)$fila["juego_puzzle"],
+    "juego_carreras"    => (int)$fila["juego_carreras"],
+    "tipo"              => $fila["tipo"],
+    "puntuacion"        => (int)$fila["puntuacion"]
   ];
 }
 
 // =====================================
 // 4. Devuelve los datos en formato JSON
 // =====================================
-echo json_encode($usuarios); // Salida para el frontend (JS, etc)
-$conn->close(); // Cierra la conexión a la base de datos
+echo json_encode($usuarios);
+$conn->close();

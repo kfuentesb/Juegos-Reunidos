@@ -1,55 +1,117 @@
 <?php
-// Especifica que la respuesta será en formato JSON
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 
-// Recoge los datos enviados por POST, usando valores por defecto si no existen
-$usuario = $_POST['usuario'] ?? '';
-$email = $_POST['email'] ?? '';
-$rol = $_POST['rol'] ?? '';
-$tipo = $_POST['tipo'] ?? '';
-// Si la puntuación no está definida, por defecto es 0 (y la convierte a entero)
+// Recoger datos enviados por POST
+$usuario    = $_POST['usuario'] ?? '';
+$email      = $_POST['email'] ?? '';
+$telefono   = $_POST['telefono'] ?? '';
+$fecha      = $_POST['fecha'] ?? '';
+$genero     = $_POST['genero'] ?? '';
+$rol        = $_POST['rol'] ?? '';
+$tipo       = $_POST['tipo'] ?? 'jugador';
+$password   = $_POST['password'] ?? '';
 $puntuacion = isset($_POST['puntuacion']) ? (int)$_POST['puntuacion'] : 0;
 
-// Comprueba que todos los campos obligatorios están completos
-if ($usuario === '' || $email === '' || $rol === '' || $tipo === '') {
-  // Si falta algún campo, responde con error en formato JSON y termina la ejecución
-  echo json_encode(['success' => false, 'message' => 'Datos incompletos']);
+// Intereses (checkboxes)
+$estrategia = isset($_POST['juego_estrategia']) ? (int)$_POST['juego_estrategia'] : 0;
+$accion     = isset($_POST['juego_accion']) ? (int)$_POST['juego_accion'] : 0;
+$rpg        = isset($_POST['juego_rpg']) ? (int)$_POST['juego_rpg'] : 0;
+$puzzle     = isset($_POST['juego_puzzle']) ? (int)$_POST['juego_puzzle'] : 0;
+$carreras   = isset($_POST['juego_carreras']) ? (int)$_POST['juego_carreras'] : 0;
+
+// Validación mínima
+if ($usuario === '' || $email === '' || $telefono === '' || $fecha === '' || $genero === '' || $rol === '' || $password === '') {
+  echo json_encode([
+    "success" => false,
+    "message" => "Faltan campos obligatorios"
+  ]);
   exit;
 }
 
-// Crea una conexión a la base de datos MySQL (servidor local, usuario root, sin contraseña, BD "ada")
+// Conexión a la base de datos
 $conn = new mysqli("localhost", "root", "", "ada");
-
-// Si hay error en la conexión, responde con error y termina la ejecución
 if ($conn->connect_error) {
-  echo json_encode(['success' => false, 'message' => 'Error conexión DB']);
+  echo json_encode([
+    "success" => false,
+    "message" => "Error conexión DB"
+  ]);
   exit;
 }
 
-// Inicia una transacción SQL para asegurar que ambos UPDATE se hagan de manera atómica
+// Verificar si el usuario ya existe
+$stmtCheck = $conn->prepare("SELECT usuario FROM usuarios WHERE usuario = ? LIMIT 1");
+$stmtCheck->bind_param("s", $usuario);
+$stmtCheck->execute();
+$resultCheck = $stmtCheck->get_result();
+if ($resultCheck->num_rows > 0) {
+  $stmtCheck->close();
+  $conn->close();
+  echo json_encode([
+    "success" => false,
+    "message" => "El usuario ya existe"
+  ]);
+  exit;
+}
+$stmtCheck->close();
+
+// Iniciamos una transacción
 $conn->begin_transaction();
 
 try {
-  // Prepara y ejecuta la primera consulta: actualiza email, rol y tipo del usuario
-  $stmt1 = $conn->prepare("UPDATE usuarios SET email = ?, rol = ?, tipo = ? WHERE usuario = ?");
-  $stmt1->bind_param("ssss", $email, $rol, $tipo, $usuario);
-  $stmt1->execute();
+  // INSERT en tabla usuarios
+  $sql = "INSERT INTO usuarios
+    (idUsuario, usuario, email, telefono, fecha, genero, rol, 
+     juego_estrategia, juego_accion, juego_rpg, juego_puzzle, juego_carreras, 
+     password, tipo, fecha_registro)
+    VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
 
-  // Prepara y ejecuta la segunda consulta: actualiza la puntuación en la tabla alumnos
-  $stmt2 = $conn->prepare("UPDATE alumnos SET puntuacion = ? WHERE alumno = ?");
-  $stmt2->bind_param("is", $puntuacion, $usuario);
-  $stmt2->execute();
+  $stmt = $conn->prepare($sql);
+  $stmt->bind_param(
+    "ssssssiiiiiss",
+    $usuario,
+    $email,
+    $telefono,
+    $fecha,
+    $genero,
+    $rol,
+    $estrategia,
+    $accion,
+    $rpg,
+    $puzzle,
+    $carreras,
+    $password,
+    $tipo
+  );
 
-  // Si las dos actualizaciones fueron exitosas, confirma la transacción
+  if (!$stmt->execute()) {
+    throw new Exception("Error al insertar en usuarios: " . $stmt->error);
+  }
+  $stmt->close();
+
+  // INSERT en tabla alumnos
+  $sql2 = "INSERT INTO alumnos (idAlumno, alumno, puntuacion) VALUES (NULL, ?, ?)";
+  $stmt2 = $conn->prepare($sql2);
+  $stmt2->bind_param("si", $usuario, $puntuacion);
+
+  if (!$stmt2->execute()) {
+    throw new Exception("Error al insertar en alumnos: " . $stmt2->error);
+  }
+  $stmt2->close();
+
+  // Confirmar la transacción
   $conn->commit();
-  // Responde indicando éxito
-  echo json_encode(['success' => true]);
+
+  echo json_encode([
+    "success" => true,
+    "message" => "Usuario creado correctamente"
+  ]);
+
 } catch (Exception $e) {
-  // Si ocurre un error en cualquiera de los pasos, revierte la transacción
   $conn->rollback();
-  // Devuelve un mensaje de error en formato JSON
-  echo json_encode(['success' => false, 'message' => 'Error al actualizar']);
+  echo json_encode([
+    "success" => false,
+    "message" => $e->getMessage()
+  ]);
 }
 
-// Cierra la conexión a la base de datos
 $conn->close();

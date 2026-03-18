@@ -1,16 +1,23 @@
 <?php
+session_start();
 header('Content-Type: application/json; charset=utf-8');
 
+// Verificar que el usuario está logueado
+if (!isset($_SESSION['user'])) {
+  echo json_encode([
+    'success' => false,
+    'message' => 'No hay sesión activa'
+  ]);
+  exit;
+}
+
 // Recoger datos enviados por POST
-$usuario_original = $_POST['usuario_original'] ?? '';
 $usuario          = $_POST['usuario'] ?? '';
 $email            = $_POST['email'] ?? '';
 $telefono         = $_POST['telefono'] ?? '';
 $fecha            = $_POST['fecha'] ?? '';
 $genero           = $_POST['genero'] ?? '';
 $rol              = $_POST['rol'] ?? '';
-$tipo             = $_POST['tipo'] ?? '';
-$puntuacion       = isset($_POST['puntuacion']) ? (int)$_POST['puntuacion'] : 0;
 $password         = $_POST['password'] ?? ''; // Puede estar vacío (no cambiar)
 
 // Intereses (checkboxes)
@@ -21,10 +28,22 @@ $puzzle     = isset($_POST['juego_puzzle']) ? (int)$_POST['juego_puzzle'] : 0;
 $carreras   = isset($_POST['juego_carreras']) ? (int)$_POST['juego_carreras'] : 0;
 
 // Validación
-if ($usuario_original === '' || $usuario === '' || $email === '' || $telefono === '' || $fecha === '' || $genero === '' || $rol === '' || $tipo === '') {
+if ($usuario === '' || $email === '' || $telefono === '' || $fecha === '' || $genero === '' || $rol === '') {
   echo json_encode([
-    "success" => false,
-    "message" => "Datos incompletos"
+    'success' => false,
+    'message' => 'Datos incompletos'
+  ]);
+  exit;
+}
+
+// Solo puede editar su propio perfil (o un admin puede editar cualquiera)
+$sessionUser = $_SESSION['user']['user'];
+$sessionTipo = $_SESSION['user']['tipo'] ?? 'jugador';
+
+if ($usuario !== $sessionUser && $sessionTipo !== 'admin') {
+  echo json_encode([
+    'success' => false,
+    'message' => 'No tienes permiso para editar este perfil'
   ]);
   exit;
 }
@@ -33,8 +52,8 @@ if ($usuario_original === '' || $usuario === '' || $email === '' || $telefono ==
 $conn = new mysqli("localhost", "root", "", "ada");
 if ($conn->connect_error) {
   echo json_encode([
-    "success" => false,
-    "message" => "Error conexión DB"
+    'success' => false,
+    'message' => 'Error conexión DB'
   ]);
   exit;
 }
@@ -43,24 +62,10 @@ if ($conn->connect_error) {
 $conn->begin_transaction();
 
 try {
-  // Si el nombre de usuario cambió, verificar que no exista
-  if ($usuario !== $usuario_original) {
-    $stmtCheck = $conn->prepare("SELECT usuario FROM usuarios WHERE usuario = ? LIMIT 1");
-    $stmtCheck->bind_param("s", $usuario);
-    $stmtCheck->execute();
-    $resultCheck = $stmtCheck->get_result();
-    if ($resultCheck->num_rows > 0) {
-      $stmtCheck->close();
-      throw new Exception("El nuevo nombre de usuario ya existe");
-    }
-    $stmtCheck->close();
-  }
-
   // UPDATE en tabla usuarios
   if ($password !== '') {
     // Si se proporcionó nueva contraseña, actualizarla también
     $sql = "UPDATE usuarios SET 
-              usuario = ?, 
               email = ?, 
               telefono = ?, 
               fecha = ?, 
@@ -70,15 +75,13 @@ try {
               juego_accion = ?, 
               juego_rpg = ?, 
               juego_puzzle = ?, 
-              juego_carreras = ?, 
-              tipo = ?,
+              juego_carreras = ?,
               password = ?
             WHERE usuario = ?";
     
     $stmt = $conn->prepare($sql);
     $stmt->bind_param(
-      "ssssssiiiiisss",
-      $usuario,
+      "ssssiiiiisss",
       $email,
       $telefono,
       $fecha,
@@ -89,14 +92,12 @@ try {
       $rpg,
       $puzzle,
       $carreras,
-      $tipo,
       $password,
-      $usuario_original
+      $usuario
     );
   } else {
     // Sin cambio de contraseña
     $sql = "UPDATE usuarios SET 
-              usuario = ?, 
               email = ?, 
               telefono = ?, 
               fecha = ?, 
@@ -106,14 +107,12 @@ try {
               juego_accion = ?, 
               juego_rpg = ?, 
               juego_puzzle = ?, 
-              juego_carreras = ?, 
-              tipo = ?
+              juego_carreras = ?
             WHERE usuario = ?";
     
     $stmt = $conn->prepare($sql);
     $stmt->bind_param(
-      "ssssssiiiiiss",
-      $usuario,
+      "ssssiiiiiss",
       $email,
       $telefono,
       $fecha,
@@ -124,39 +123,34 @@ try {
       $rpg,
       $puzzle,
       $carreras,
-      $tipo,
-      $usuario_original
+      $usuario
     );
   }
 
   if (!$stmt->execute()) {
-    throw new Exception("Error al actualizar usuarios: " . $stmt->error);
+    throw new Exception("Error al actualizar perfil: " . $stmt->error);
   }
   $stmt->close();
-
-  // UPDATE en tabla alumnos (puntuación y nombre si cambió)
-  $sql2 = "UPDATE alumnos SET alumno = ?, puntuacion = ? WHERE alumno = ?";
-  $stmt2 = $conn->prepare($sql2);
-  $stmt2->bind_param("sis", $usuario, $puntuacion, $usuario_original);
-
-  if (!$stmt2->execute()) {
-    throw new Exception("Error al actualizar alumnos: " . $stmt2->error);
-  }
-  $stmt2->close();
 
   // Confirmar transacción
   $conn->commit();
 
+  // Actualizar datos de sesión si es el usuario actual
+  if ($usuario === $sessionUser) {
+    $_SESSION['user']['email'] = $email;
+    $_SESSION['user']['rol'] = $rol;
+  }
+
   echo json_encode([
-    "success" => true,
-    "message" => "Usuario actualizado correctamente"
+    'success' => true,
+    'message' => 'Perfil actualizado correctamente'
   ]);
 
 } catch (Exception $e) {
   $conn->rollback();
   echo json_encode([
-    "success" => false,
-    "message" => $e->getMessage()
+    'success' => false,
+    'message' => $e->getMessage()
   ]);
 }
 
