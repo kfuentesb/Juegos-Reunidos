@@ -240,7 +240,7 @@ function renderTablaUsuarios(lista) {
     genero: formatearGenero(u.genero),
     rol: formatearFrecuencia(u.rol),
     intereses: formatearIntereses(u),
-    tipo: u.tipo || 'jugador',
+    tipo: u.tipo || 'usuario',
     puntuacion: u.puntuacion ?? 0,
     rawData: u // Guardamos los datos originales para edición
   }));
