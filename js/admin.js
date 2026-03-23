@@ -368,7 +368,7 @@ function cargarUsuarios() {
  * Carga los datos de juegos desde un archivo JSON.
  */
 function cargarDatosJuegos() {
-  return fetch('../components/juegos.json')
+  return fetch('../../components/juegos.json')
     .then(response => {
       if (!response.ok) {
         throw new Error('No se pudo cargar juegos.json: ' + response.status);
