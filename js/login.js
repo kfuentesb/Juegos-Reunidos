@@ -268,6 +268,9 @@ function renderUserUI(usuario) {
 /* =========================
    7) PESTAÑA ADMIN
    =========================
+   Inserta el enlace "Panel Admin" en la navbar cuando el usuario
+   logueado tiene rol "admin". La ruta se ajusta automáticamente
+   según si estamos en la raíz o dentro de components/.
 */
 function insertarPestanaAdmin() {
   if (document.getElementById("nav-admin")) return;
@@ -275,10 +278,14 @@ function insertarPestanaAdmin() {
   const navList = document.querySelector(".navbar-nav");
   if (!navList) return;
 
+  // Ajustar href según la ubicación de la página actual
+  const enComponents = location.pathname.includes("/components/");
+  const adminHref = enComponents ? "admin.html" : "components/admin.html";
+
   const li = document.createElement("li");
   li.className = "nav-item";
   li.innerHTML =
-    '<a class="nav-link text-warning fw-bold" id="nav-admin" href="#">Panel Admin</a>';
+    `<a class="nav-link text-warning fw-bold" id="nav-admin" href="${adminHref}">⚙️ Panel Admin</a>`;
 
   navList.appendChild(li);
 }
